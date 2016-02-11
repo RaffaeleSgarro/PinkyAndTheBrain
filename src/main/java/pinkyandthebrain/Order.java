@@ -30,4 +30,12 @@ public class Order {
     public List<Product> getProducts() {
         return products;
     }
+
+    public void removeProduct(Product product) {
+        products.remove(product);
+    }
+
+    public boolean isEmpty() {
+        return products.isEmpty();
+    }
 }

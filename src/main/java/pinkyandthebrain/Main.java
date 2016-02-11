@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class Main {
@@ -68,5 +69,15 @@ public class Main {
         log.info("Loaded simulation parameters from " + resourceName);
 
         simulation.start();
+
+        PrintWriter out = new PrintWriter(System.out);
+        out.println(simulation.getCommands().size());
+
+        for (String command : simulation.getCommands()) {
+            out.println(command);
+        }
+
+        out.flush();
+        out.close();
     }
 }

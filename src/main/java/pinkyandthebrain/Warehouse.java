@@ -27,4 +27,8 @@ public class Warehouse {
     public int queryProductQuantity(int productId) {
         return productQuantity[productId];
     }
+
+    public void decreaseProductQuantity(int id) {
+        productQuantity[id]--;
+    }
 }

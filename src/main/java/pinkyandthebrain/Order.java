@@ -26,4 +26,8 @@ public class Order {
     public Point2D getDestination() {
         return destination;
     }
+
+    public List<Product> getProducts() {
+        return products;
+    }
 }

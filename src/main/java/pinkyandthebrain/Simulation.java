@@ -32,7 +32,7 @@ public class Simulation {
     }
 
     public Warehouse addWarehouse(int id, int row, int column) {
-        Warehouse warehouse = new Warehouse(id, row, column);
+        Warehouse warehouse = new Warehouse(id, row, column, products.size());
         warehouses.add(warehouse);
         return warehouse;
     }

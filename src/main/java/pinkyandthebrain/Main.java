@@ -32,7 +32,7 @@ public class Main {
         for (int id = 0; id < numberOfProducts; id++) {
             int weight = scanner.nextInt();
             Preconditions.checkArgument(weight <= droneCapacity);
-            Product product = simulation.createProduct(id, weight);
+            simulation.createProduct(id, weight);
         }
 
         int numberOfWarehouses = scanner.nextInt();
@@ -43,7 +43,7 @@ public class Main {
             Warehouse warehouse = simulation.addWarehouse(id, row, column);
             for (int productId = 0; productId < numberOfProducts; productId++) {
                 int productCount = scanner.nextInt();
-                warehouse.setProductCount(productId, productCount);
+                warehouse.setProductQuantity(productId, productCount);
             }
         }
 

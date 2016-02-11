@@ -63,8 +63,10 @@ public class Main {
             }
         }
 
+        scanner.close();
+
         log.info("Loaded simulation parameters from " + resourceName);
 
-        scanner.close();
+        simulation.start();
     }
 }

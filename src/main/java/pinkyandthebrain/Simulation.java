@@ -48,4 +48,8 @@ public class Simulation {
         Preconditions.checkNotNull(product, "Could not find a product with ID " + productType);
         return product;
     }
+
+    public void start() {
+        throw new RuntimeException("Not implemented yet! :P");
+    }
 }

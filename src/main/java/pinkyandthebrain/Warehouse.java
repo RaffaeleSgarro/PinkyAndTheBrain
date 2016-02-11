@@ -3,14 +3,12 @@ package pinkyandthebrain;
 public class Warehouse {
 
     private final int id;
-    private final int row;
-    private final int col;
+    private final Point2D location;
     private final int productQuantity[];
 
     public Warehouse(int id, int row, int col, int numberOfProducts) {
         this.id = id;
-        this.row = row;
-        this.col = col;
+        this.location = new Point2D(row, col);
         this.productQuantity = new int[numberOfProducts];
     }
 
@@ -18,12 +16,8 @@ public class Warehouse {
         return id;
     }
 
-    public int getRow() {
-        return row;
-    }
-
-    public int getCol() {
-        return col;
+    public Point2D getLocation() {
+        return location;
     }
 
     public void setProductQuantity(int productId, int productCount) {

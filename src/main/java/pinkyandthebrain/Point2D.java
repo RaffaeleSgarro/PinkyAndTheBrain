@@ -19,6 +19,6 @@ public class Point2D {
     }
 
     public int distanceTo(Point2D that) {
-        return (int) Math.floor(Math.sqrt(Math.pow(row - that.row, 2) + Math.pow(col - that.col, 2)));
+        return (int) Math.ceil(Math.sqrt(Math.pow(row - that.row, 2) + Math.pow(col - that.col, 2)));
     }
 }

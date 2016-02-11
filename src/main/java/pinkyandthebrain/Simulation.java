@@ -93,18 +93,15 @@ public class Simulation {
 
                 int endsOnTurn = this.turn + busyTurns;
 
-                if (endsOnTurn >= deadline - 10) {
+                // TODO what a workaround
+                if (endsOnTurn >= deadline - 15000) {
                     return;
                 }
 
                 drone.setBusyUntilTurn(endsOnTurn);
                 commands.add(drone.getId() + " " + "L" + " " + warehouse.getId() + " " + product.getId() + " 1");
                 commands.add(drone.getId() + " " + "D" + " " + order.getOrderId() + " " + product.getId() + " 1");
-
-
-
             }
-
         }
     }
 

@@ -52,4 +52,37 @@ public class Simulation {
     public void start() {
         // ...
     }
+
+
+    public int getRows() {
+        return rows;
+    }
+
+    public int getColumns() {
+        return columns;
+    }
+
+    public int getDrones() {
+        return drones;
+    }
+
+    public int getDeadline() {
+        return deadline;
+    }
+
+    public int getDroneCapacity() {
+        return droneCapacity;
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public List<Warehouse> getWarehouses() {
+        return warehouses;
+    }
+
+    public List<Order> getOrders() {
+        return orders;
+    }
 }

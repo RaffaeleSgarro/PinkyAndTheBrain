@@ -91,7 +91,7 @@ public class Simulation {
                 int d2 = warehouse.getLocation().distanceTo(order.getDestination());
                 int busyTurns = d1 + 1 + d2 + 1;
 
-                commands.add(drone.getId() + " " + "L" + " " + product.getId() + " " + warehouse.getId() + " 1");
+                commands.add(drone.getId() + " " + "L" + " " + warehouse.getId() + " " + product.getId() + " 1");
                 commands.add(drone.getId() + " " + "D" + " " + order.getOrderId() + " " + product.getId() + " 1");
 
                 drone.setBusyUntilTurn(turn + busyTurns);

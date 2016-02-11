@@ -50,6 +50,6 @@ public class Simulation {
     }
 
     public void start() {
-        throw new RuntimeException("Not implemented yet! :P");
+        // ...
     }
 }

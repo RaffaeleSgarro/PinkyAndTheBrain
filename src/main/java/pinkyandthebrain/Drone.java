@@ -33,4 +33,8 @@ public class Drone {
     public int getId() {
         return id;
     }
+
+    public void flightTo(Point2D destination) {
+        this.currentLocation = destination;
+    }
 }

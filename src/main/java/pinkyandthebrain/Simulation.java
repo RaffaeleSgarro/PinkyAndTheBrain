@@ -2,7 +2,6 @@ package pinkyandthebrain;
 
 import com.google.common.base.Preconditions;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,7 +83,17 @@ public class Simulation {
                 if (order.getProducts().size() == 0)
                     orders.remove(0);
 
-                Warehouse warehouse = findWarehouseWith(product);
+                List<Warehouse> availableWarehouses = findWarehouseWith(product);
+                Warehouse warehouse = null;
+                int bestDistance = Integer.MAX_VALUE;
+                for (Warehouse available : availableWarehouses) {
+                    int distance = drone.distanceTo(available) + available.getLocation().distanceTo(order.getDestination());
+                    if (distance < bestDistance) {
+                        bestDistance = distance;
+                        warehouse = available;
+                    }
+                }
+
                 warehouse.decreaseProductQuantity(product.getId());
 
                 int d1 = drone.distanceTo(warehouse);
@@ -99,20 +108,23 @@ public class Simulation {
                 }
 
                 drone.setBusyUntilTurn(endsOnTurn);
+                drone.flightTo(order.getDestination());
                 commands.add(drone.getId() + " " + "L" + " " + warehouse.getId() + " " + product.getId() + " 1");
                 commands.add(drone.getId() + " " + "D" + " " + order.getOrderId() + " " + product.getId() + " 1");
             }
         }
     }
 
-    private Warehouse findWarehouseWith(Product product) {
+    private List<Warehouse> findWarehouseWith(Product product) {
+        List<Warehouse> available = new ArrayList<>();
         for (Warehouse warehouse : warehouses) {
             if (warehouse.queryProductQuantity(product.getId()) > 0) {
-                return warehouse;
+                available.add(warehouse);
             }
         }
 
-        throw new RuntimeException("Ops! Could not find warehouse with product " + product.getId());
+        Preconditions.checkArgument(!available.isEmpty());
+        return available;
     }
 
     private Drone findDrone() {

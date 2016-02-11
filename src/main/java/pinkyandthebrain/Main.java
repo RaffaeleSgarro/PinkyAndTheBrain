@@ -47,6 +47,22 @@ public class Main {
             }
         }
 
+        int numberOfOrders = scanner.nextInt();
+
+        for (int orderId = 0; orderId < numberOfOrders; orderId++) {
+
+            int destinationRow = scanner.nextInt();
+            int destinationColumn = scanner.nextInt();
+            int numberOfProductsInThisOrder = scanner.nextInt();
+
+            Order order = simulation.addOrder(orderId, destinationRow, destinationColumn);
+
+            for (int i = 0; i < numberOfProductsInThisOrder; i++) {
+                int productType = scanner.nextInt();
+                order.addProduct(simulation.findProduct(productType));
+            }
+        }
+
         log.info("Loaded simulation parameters from " + resourceName);
 
         scanner.close();

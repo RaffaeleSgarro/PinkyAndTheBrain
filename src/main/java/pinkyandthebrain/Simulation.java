@@ -1,5 +1,7 @@
 package pinkyandthebrain;
 
+import com.google.common.base.Preconditions;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +15,7 @@ public class Simulation {
 
     private final List<Product> products = new ArrayList<>();
     private final List<Warehouse> warehouses = new ArrayList<>();
+    private final List<Order> orders = new ArrayList<>();
 
     public Simulation(int rows, int columns, int drones, int deadline, int droneCapacity) {
         this.rows = rows;
@@ -32,5 +35,17 @@ public class Simulation {
         Warehouse warehouse = new Warehouse(id, row, column);
         warehouses.add(warehouse);
         return warehouse;
+    }
+
+    public Order addOrder(int orderId, int destinationRow, int destinationColumn) {
+        Order order = new Order(orderId, destinationRow, destinationColumn);
+        orders.add(order);
+        return order;
+    }
+
+    public Product findProduct(int productType) {
+        Product product = products.get(productType);
+        Preconditions.checkNotNull(product, "Could not find a product with ID " + productType);
+        return product;
     }
 }

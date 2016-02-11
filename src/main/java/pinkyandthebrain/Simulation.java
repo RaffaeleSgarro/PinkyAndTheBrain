@@ -96,15 +96,10 @@ public class Simulation {
 
                 warehouse.decreaseProductQuantity(product.getId());
 
-                int d1 = drone.distanceTo(warehouse);
-                int d2 = warehouse.getLocation().distanceTo(order.getDestination());
-                int busyTurns = d1 + 1 + d2 + 1;
+                int endsOnTurn = turn + bestDistance + 2;
 
-                int endsOnTurn = this.turn + busyTurns;
-
-                // TODO what a workaround
-                if (endsOnTurn >= deadline - 15000) {
-                    return;
+                if (endsOnTurn >= deadline) {
+                    continue ;
                 }
 
                 drone.setBusyUntilTurn(endsOnTurn);

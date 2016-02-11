@@ -4,9 +4,7 @@ import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Scanner;
 
 public class Main {
@@ -70,7 +68,7 @@ public class Main {
 
         simulation.start();
 
-        PrintWriter out = new PrintWriter(System.out);
+        PrintWriter out = new PrintWriter(new FileOutputStream(new File(args[0] + ".commands")));
         out.println(simulation.getCommands().size());
 
         for (String command : simulation.getCommands()) {

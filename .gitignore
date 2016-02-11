@@ -7,3 +7,5 @@ build/
 .idea/uiDesigner.xml
 .idea/misc.xml
 .idea/libraries
+
+*.commands

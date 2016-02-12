@@ -1,15 +1,19 @@
 package pinkyandthebrain;
 
+import com.google.common.base.Preconditions;
+
 public class Warehouse {
 
     private final int id;
     private final Point2D location;
-    private final int productQuantity[];
+    private final int available[];
+    private final int reserved[];
 
     public Warehouse(int id, int row, int col, int numberOfProducts) {
         this.id = id;
         this.location = new Point2D(row, col);
-        this.productQuantity = new int[numberOfProducts];
+        this.available = new int[numberOfProducts];
+        this.reserved = new int[numberOfProducts];
     }
 
     public int getId() {
@@ -21,14 +25,27 @@ public class Warehouse {
     }
 
     public void setProductQuantity(int productId, int productCount) {
-        productQuantity[productId] = productCount;
+        available[productId] = productCount;
     }
 
     public int queryProductQuantity(int productId) {
-        return productQuantity[productId];
+        return available[productId];
     }
 
-    public void decreaseProductQuantity(int id) {
-        productQuantity[id]--;
+    public void retrieve(Product product, int quantity) {
+        Preconditions.checkArgument(reserved[product.getId()] >= quantity);
+        reserved[product.getId()] -= quantity;
+    }
+
+    public void reserve(Product product, int quantity) {
+        Preconditions.checkArgument(available[product.getId()] >= quantity,
+                "This warehouse only contains "
+                        + available[product.getId()]
+                        + " of Product#" + product.getId()
+                        + " but " + quantity
+                        + " was requested");
+
+        available[product.getId()] -= quantity;
+        reserved[product.getId()] += quantity;
     }
 }

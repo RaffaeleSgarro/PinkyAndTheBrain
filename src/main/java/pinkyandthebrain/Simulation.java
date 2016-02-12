@@ -1,11 +1,16 @@
 package pinkyandthebrain;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Collections2;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-public class Simulation {
+import static pinkyandthebrain.Functions.turnsForDistance;
+
+public class Simulation implements OrderCompletedListener {
 
     private final int rows;
     private final int columns;
@@ -17,8 +22,8 @@ public class Simulation {
     private final List<Product> products = new ArrayList<>();
     private final List<Warehouse> warehouses = new ArrayList<>();
     private final List<Order> orders = new ArrayList<>();
+
     private int turn;
-    private List<String> commands;
 
     public Simulation(int rows, int columns, int numberOfDrones, int deadline, int droneCapacity) {
         this.rows = rows;
@@ -26,10 +31,6 @@ public class Simulation {
         this.numberOfDrones = numberOfDrones;
         this.deadline = deadline;
         this.droneCapacity = droneCapacity;
-    }
-
-    public List<String> getCommands() {
-        return commands;
     }
 
     public Product createProduct(int id, int weight) {
@@ -56,110 +57,142 @@ public class Simulation {
         return product;
     }
 
-    public void start() {
-        // ...
-        commands = new ArrayList<>();
+    private Collection<Drone> activeDrones() {
+        return Collections2.filter(drones, new com.google.common.base.Predicate<Drone>() {
+            @Override
+            public boolean apply(Drone drone) {
+                return !drone.isShutDown();
+            }
+        });
+    }
 
+    private void submitCommands() {
+        for (Drone drone : activeDrones()) {
+            if (drone.isBusy()) {
+                continue;
+            }
+
+            Item item = null;
+
+            for (Order order : orders) {
+                if (!order.isScheduled()) {
+                    item = order.findFirstUnscheduled();
+                }
+            }
+
+            List<Warehouse> availableWarehouses = findWarehouseWith(item.getProduct(), 1);
+            Warehouse warehouse = null;
+            double bestDistance = Double.MAX_VALUE;
+            for (Warehouse available : availableWarehouses) {
+                double distance = drone.getPosition().distanceTo(available.getLocation())
+                                + available.getLocation().distanceTo(item.getOrder().getDestination());
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    warehouse = available;
+                }
+            }
+
+            if (turn + 1 + turnsForDistance(bestDistance) + 1 >= deadline) {
+                continue;
+            }
+
+            item.setScheduled(true);
+            warehouse.reserve(item.getProduct(), 1);
+
+            drone.submit(new Load(warehouse, item.getProduct(), 1));
+            drone.submit(new Deliver(item.getOrder(), item.getProduct(), 1));
+        }
+    }
+
+    public void start() {
         Point2D initialDronePosition = warehouses.get(0).getLocation();
         for (int droneId = 0; droneId < numberOfDrones; droneId++) {
             drones.add(new Drone(droneId, droneCapacity, initialDronePosition));
         }
 
-        outer:
-        for (turn = 0; turn < deadline; turn++) {
-            while (true) {
-                if (orders.isEmpty()) {
-                    // Abbiamo finito :))))
-                    return;
+        for (Order order : orders) {
+            order.addCompletedListener(this);
+        }
+
+        turn = -1;
+
+        while (hasPendingOrders()) {
+            if (turn < deadline - 1) {
+                turn++;
+                if (hasUnscheduledOrders()) {
+                    submitCommands();
                 }
-                Drone drone = findDrone();
-                if (drone == null)
-                    continue outer;
+            } else {
+                break;
+            }
 
-                Order order = orders.get(0);
-
-                Product product = order.getProducts().get(0);
-                order.getProducts().remove(0);
-                if (order.getProducts().size() == 0)
-                    orders.remove(0);
-
-                List<Warehouse> availableWarehouses = findWarehouseWith(product);
-                Warehouse warehouse = null;
-                int bestDistance = Integer.MAX_VALUE;
-                for (Warehouse available : availableWarehouses) {
-                    int distance = drone.distanceTo(available) + available.getLocation().distanceTo(order.getDestination());
-                    if (distance < bestDistance) {
-                        bestDistance = distance;
-                        warehouse = available;
-                    }
-                }
-
-                warehouse.decreaseProductQuantity(product.getId());
-
-                int endsOnTurn = turn + bestDistance + 2;
-
-                if (endsOnTurn >= deadline) {
-                    continue ;
-                }
-
-                drone.setBusyUntilTurn(endsOnTurn);
-                drone.flightTo(order.getDestination());
-                commands.add(drone.getId() + " " + "L" + " " + warehouse.getId() + " " + product.getId() + " 1");
-                commands.add(drone.getId() + " " + "D" + " " + order.getOrderId() + " " + product.getId() + " 1");
+            for (Drone drone : activeDrones()) {
+                drone.executeNextCommand();
             }
         }
     }
 
-    private List<Warehouse> findWarehouseWith(Product product) {
+    private boolean hasUnscheduledOrders() {
+        for (Order order : orders) {
+            if (!order.isScheduled()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasPendingOrders() {
+        for (Order order : orders) {
+            if (!order.isCompleted())
+                return true;
+        }
+        return false;
+    }
+
+    private List<Warehouse> findWarehouseWith(Product product, int quantity) {
         List<Warehouse> available = new ArrayList<>();
         for (Warehouse warehouse : warehouses) {
-            if (warehouse.queryProductQuantity(product.getId()) > 0) {
+            if (warehouse.queryProductQuantity(product.getId()) >= quantity) {
                 available.add(warehouse);
             }
         }
 
-        Preconditions.checkArgument(!available.isEmpty());
+        Preconditions.checkArgument(!available.isEmpty(), "Could not find a warehouse with " + product);
         return available;
     }
 
-    private Drone findDrone() {
+    public int getScore() {
+        int score = 0;
+        for (Order order : orders) {
+            if (order.isScheduled()) {
+                score += order.getScoreAtTurn(turn);
+            }
+        }
+        return score;
+    }
+
+    public void printCommands(PrintWriter out) {
+        List<String> commands = new ArrayList<>();
+
         for (Drone drone : drones) {
-            if (!drone.isBusy(turn))
-                return drone;
+            for (Command command : drone.getExecutedCommands()) {
+                commands.add(drone.getId() + " " + command);
+            }
         }
 
-        return null;
+        out.println(commands.size());
+
+        for (String command : commands) {
+            out.println(command);
+        }
     }
 
-    public int getRows() {
-        return rows;
+    public int countTurns() {
+        return turn + 1;
     }
 
-    public int getColumns() {
-        return columns;
-    }
-
-    public int getNumberOfDrones() {
-        return numberOfDrones;
-    }
-
-    public int getDeadline() {
-        return deadline;
-    }
-
-    public int getDroneCapacity() {
-        return droneCapacity;
-    }
-
-    public List<Product> getProducts() {
-        return products;
-    }
-
-    public List<Warehouse> getWarehouses() {
-        return warehouses;
-    }
-
-    public List<Order> getOrders() {
-        return orders;
+    @Override
+    public void onOrderCompleted(Order order) {
+        order.setCompletedOnTurn(turn);
     }
 }

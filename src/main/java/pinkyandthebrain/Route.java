@@ -27,9 +27,9 @@ public class Route {
         if (turn == length - 1) {
             currentPosition = to;
         } else{
-            int row = (to.row() - from.row()) / length * (turn + 1);
-            int col = (to.col() - from.col()) / length * (turn + 1);
-            currentPosition = new Point2D(row, col);
+            int row = (to.row() - from.row()) * (turn + 1) / length;
+            int col = (to.col() - from.col()) * (turn + 1) / length;
+            currentPosition = new Point2D(from.row() + row, from.col() + col);
         }
     }
 
@@ -38,5 +38,13 @@ public class Route {
             return 0;
 
         return (int) (Math.ceil(from.distanceTo(to)));
+    }
+
+    public Point2D getFrom() {
+        return from;
+    }
+
+    public Point2D getTo() {
+        return to;
     }
 }

@@ -19,6 +19,7 @@ public class Load implements Command {
     public int execute(Drone drone) {
         if (route == null) {
             route = new Route(drone.getPosition(), warehouse.getLocation());
+            drone.setRoute(route);
         }
 
         // TODO use route.turns() ?

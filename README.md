@@ -16,3 +16,13 @@ the existing project.
 The following commands generate the required files in `build/judge`
 
     .\gradlew sourceCode simulations
+
+## Usage
+
+The main class `pinkyandthebrain.Main` executes all the simulations named
+on the command line. The following system properties are checked:
+
+- save, `-Dsave=false`, defaults to `false`, stores the drones commands in a file
+suitable to be sent to the judge system
+- d, `-Dd=build/judge`, defaults to `judge`, set the directory where commands files
+are stored

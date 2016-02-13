@@ -19,6 +19,9 @@ public class Simulation implements OrderCompletedListener {
     private final List<Product> products = new ArrayList<>();
     private final List<Warehouse> warehouses = new ArrayList<>();
     private final List<Order> orders = new ArrayList<>();
+    private final List<TurnListener> turnListeners = new ArrayList<>();
+
+    private Ticker ticker = new NOOPTicker();
 
     private int turn;
 
@@ -76,7 +79,10 @@ public class Simulation implements OrderCompletedListener {
 
         player.initialize(this);
 
+        // TODO draw initial
+
         while (hasPendingOrders()) {
+            ticker.tick();
             if (turn < deadline - 1) {
                 turn++;
                 if (hasUnscheduledOrders()) {
@@ -90,6 +96,10 @@ public class Simulation implements OrderCompletedListener {
                 if (!drone.isShutDown()) {
                     drone.executeNextCommand();
                 }
+            }
+
+            for (TurnListener turnListener : turnListeners) {
+                turnListener.onSimulationTurn(this);
             }
         }
     }
@@ -168,5 +178,17 @@ public class Simulation implements OrderCompletedListener {
 
     public List<Warehouse> getWarehouses() {
         return warehouses;
+    }
+
+    public void addTurnListener(TurnListener listener) {
+        turnListeners.add(listener);
+    }
+
+    public boolean removeTurnListener(TurnListener listener) {
+        return turnListeners.remove(listener);
+    }
+
+    public void setTicker(Ticker ticker) {
+        this.ticker = ticker;
     }
 }

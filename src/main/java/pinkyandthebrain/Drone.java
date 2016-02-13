@@ -12,6 +12,7 @@ public class Drone {
 
     private final int id;
     private final int capacity;
+    private Route route;
     private Point2D currentLocation;
     private Command currentCommand;
     private boolean shutdown;
@@ -98,6 +99,14 @@ public class Drone {
             weight += product.getWeight();
         }
         return weight;
+    }
+
+    public Route getRoute() {
+        return route;
+    }
+
+    public void setRoute(Route route) {
+        this.route = route;
     }
 
     public boolean isShutDown() {

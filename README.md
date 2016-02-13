@@ -10,3 +10,9 @@ February 2016
 
 Requires JDK8 and Intellij 15. With Intellij open `build.gradle` and import
 the existing project.
+
+## Submission to the Judge system
+
+The following commands generate the required files in `build/judge`
+
+    .\gradlew sourceCode simulations

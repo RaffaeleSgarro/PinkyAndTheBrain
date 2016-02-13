@@ -1,6 +1,7 @@
 apply plugin: 'java'
 
-sourceCompatibility='1.8'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -20,4 +21,17 @@ dependencies {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.9'
+}
+
+task sourceCode(type: Zip) {
+    from 'src'
+    baseName 'src'
+    destinationDir = file('build/judge')
+}
+
+task simulations(type: JavaExec, dependsOn: classes) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'pinkyandthebrain.Main'
+    systemProperties 'save': 'true', 'd' : 'build/judge'
+    args 'busy_day.in', 'mother_of_all_warehouses.in', 'redundancy.in'
 }

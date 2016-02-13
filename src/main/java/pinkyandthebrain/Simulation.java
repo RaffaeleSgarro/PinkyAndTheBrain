@@ -1,11 +1,9 @@
 package pinkyandthebrain;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Collections2;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static pinkyandthebrain.Functions.turnsForDistance;
@@ -57,17 +55,8 @@ public class Simulation implements OrderCompletedListener {
         return product;
     }
 
-    private Collection<Drone> activeDrones() {
-        return Collections2.filter(drones, new com.google.common.base.Predicate<Drone>() {
-            @Override
-            public boolean apply(Drone drone) {
-                return !drone.isShutDown();
-            }
-        });
-    }
-
     private void submitCommands() {
-        for (Drone drone : activeDrones()) {
+        for (Drone drone : drones) {
             if (drone.isBusy()) {
                 continue;
             }
@@ -126,8 +115,10 @@ public class Simulation implements OrderCompletedListener {
                 break;
             }
 
-            for (Drone drone : activeDrones()) {
-                drone.executeNextCommand();
+            for (Drone drone : drones) {
+                if (!drone.isShutDown()) {
+                    drone.executeNextCommand();
+                }
             }
         }
     }

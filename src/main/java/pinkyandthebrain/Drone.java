@@ -1,7 +1,6 @@
 package pinkyandthebrain;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 
 import java.util.*;
 
@@ -47,7 +46,7 @@ public class Drone {
     }
 
     public List<Command> getExecutedCommands() {
-        return ImmutableList.copyOf(executedCommands);
+        return executedCommands;
     }
 
     public void executeNextCommand() {

@@ -6,8 +6,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static pinkyandthebrain.Functions.turnsForDistance;
-
 public class Simulation implements OrderCompletedListener {
 
     private final int rows;
@@ -15,6 +13,7 @@ public class Simulation implements OrderCompletedListener {
     private final int numberOfDrones;
     private final int deadline;
     private final int droneCapacity;
+    private final Player player;
 
     private final List<Drone> drones = new ArrayList<>();
     private final List<Product> products = new ArrayList<>();
@@ -23,12 +22,13 @@ public class Simulation implements OrderCompletedListener {
 
     private int turn;
 
-    public Simulation(int rows, int columns, int numberOfDrones, int deadline, int droneCapacity) {
+    public Simulation(int rows, int columns, int numberOfDrones, int deadline, int droneCapacity, Player player) {
         this.rows = rows;
         this.columns = columns;
         this.numberOfDrones = numberOfDrones;
         this.deadline = deadline;
         this.droneCapacity = droneCapacity;
+        this.player = player;
     }
 
     public Product createProduct(int id, int weight) {
@@ -55,44 +55,6 @@ public class Simulation implements OrderCompletedListener {
         return product;
     }
 
-    private void submitCommands() {
-        for (Drone drone : drones) {
-            if (drone.isBusy()) {
-                continue;
-            }
-
-            Item item = null;
-
-            for (Order order : orders) {
-                if (!order.isScheduled()) {
-                    item = order.findFirstUnscheduled();
-                }
-            }
-
-            List<Warehouse> availableWarehouses = findWarehouseWith(item.getProduct(), 1);
-            Warehouse warehouse = null;
-            double bestDistance = Double.MAX_VALUE;
-            for (Warehouse available : availableWarehouses) {
-                double distance = drone.getPosition().distanceTo(available.getLocation())
-                                + available.getLocation().distanceTo(item.getOrder().getDestination());
-                if (distance < bestDistance) {
-                    bestDistance = distance;
-                    warehouse = available;
-                }
-            }
-
-            if (turn + 1 + turnsForDistance(bestDistance) + 1 >= deadline) {
-                continue;
-            }
-
-            item.setScheduled(true);
-            warehouse.reserve(item.getProduct(), 1);
-
-            drone.submit(new Load(warehouse, item.getProduct(), 1));
-            drone.submit(new Deliver(item.getOrder(), item.getProduct(), 1));
-        }
-    }
-
     public void start() {
         Point2D initialDronePosition = warehouses.get(0).getLocation();
         for (int droneId = 0; droneId < numberOfDrones; droneId++) {
@@ -109,7 +71,7 @@ public class Simulation implements OrderCompletedListener {
             if (turn < deadline - 1) {
                 turn++;
                 if (hasUnscheduledOrders()) {
-                    submitCommands();
+                    player.move(this);
                 }
             } else {
                 break;
@@ -140,7 +102,7 @@ public class Simulation implements OrderCompletedListener {
         return false;
     }
 
-    private List<Warehouse> findWarehouseWith(Product product, int quantity) {
+    public List<Warehouse> findWarehouseWith(Product product, int quantity) {
         List<Warehouse> available = new ArrayList<>();
         for (Warehouse warehouse : warehouses) {
             if (warehouse.queryProductQuantity(product.getId()) >= quantity) {
@@ -185,5 +147,21 @@ public class Simulation implements OrderCompletedListener {
     @Override
     public void onOrderCompleted(Order order) {
         order.setCompletedOnTurn(turn);
+    }
+
+    public int getTurn() {
+        return turn;
+    }
+
+    public int getDeadline() {
+        return deadline;
+    }
+
+    public List<Drone> getDrones() {
+        return drones;
+    }
+
+    public List<Order> getOrders() {
+        return orders;
     }
 }

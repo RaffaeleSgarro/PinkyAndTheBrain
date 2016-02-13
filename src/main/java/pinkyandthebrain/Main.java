@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pinkyandthebrain.players.DummyPlayer;
 
 import java.io.*;
 import java.util.Scanner;
@@ -41,7 +42,7 @@ public class Main {
             int deadline = scanner.nextInt();
             int droneCapacity = scanner.nextInt();
 
-            Simulation simulation = new Simulation(rows, columns, drones, deadline, droneCapacity);
+            Simulation simulation = new Simulation(rows, columns, drones, deadline, droneCapacity, new DummyPlayer());
 
             int numberOfProducts = scanner.nextInt();
 

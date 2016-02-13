@@ -164,7 +164,7 @@ public class Simulation implements OrderCompletedListener {
     public int getScore() {
         int score = 0;
         for (Order order : orders) {
-            if (order.isScheduled()) {
+            if (order.isCompleted()) {
                 score += order.getScoreAtTurn(turn);
             }
         }

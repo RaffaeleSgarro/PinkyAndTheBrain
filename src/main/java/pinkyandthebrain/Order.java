@@ -37,9 +37,7 @@ public class Order {
     }
 
     public void setCompletedOnTurn(int completedOnTurn) {
-        if (completedOnTurn > this.completedOnTurn) {
-            this.completedOnTurn = completedOnTurn;
-        }
+        this.completedOnTurn = completedOnTurn - 2;
     }
 
     public int getScoreAtTurn(int turn) {

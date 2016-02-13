@@ -6,7 +6,7 @@ public class Load implements Command {
     private final Product product;
     private final int quantity;
 
-    private int planned;
+    private Route route;
     private int executed;
 
     public Load(Warehouse warehouse, Product product, int quantity) {
@@ -17,20 +17,26 @@ public class Load implements Command {
 
     @Override
     public int execute(Drone drone) {
-        if (planned == 0) {
-            planned = 1 + Functions.turnsForDistance(drone.getPosition().distanceTo(warehouse.getLocation()));
+        if (route == null) {
+            route = new Route(drone.getPosition(), warehouse.getLocation());
         }
 
-        if (executed == planned - 1) {
+        // TODO use route.turns() ?
+        if (executed == planned() - 1) {
             warehouse.retrieve(product, quantity);
             drone.load(product, quantity);
         } else {
-            drone.flyToward(warehouse.getLocation());
+            route.advance();
+            drone.moveTo(route.getCurrentPosition());
         }
 
         executed++;
 
-        return planned - executed;
+        return planned() - executed;
+    }
+
+    private int planned() {
+        return 1 + route.turns();
     }
 
     @Override

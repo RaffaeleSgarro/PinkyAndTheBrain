@@ -6,7 +6,7 @@ public class Deliver implements Command {
     private final Product product;
     private final int quantity;
 
-    private int planned;
+    private Route route;
     private int executed;
 
     public Deliver(Order order, Product product, int quantity) {
@@ -17,19 +17,25 @@ public class Deliver implements Command {
 
     @Override
     public int execute(Drone drone) {
-        if (planned == 0) {
-            planned = 1 + Functions.turnsForDistance(drone.getPosition().distanceTo(order.getDestination()));
+        if (route == null) {
+            route = new Route(drone.getPosition(), order.getDestination());
         }
 
-        if (executed == planned - 1) {
+        // TODO use route.turns() ?
+        if (executed == planned() - 1) {
             drone.deliver(product, order);
         } else {
-            drone.flyToward(order.getDestination());
+            route.advance();
+            drone.moveTo(route.getCurrentPosition());
         }
 
         executed++;
 
-        return planned - executed;
+        return planned() - executed;
+    }
+
+    private int planned() {
+        return 1 + route.turns();
     }
 
     @Override

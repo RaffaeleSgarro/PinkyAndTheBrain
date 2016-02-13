@@ -24,7 +24,7 @@ public class Drone {
         this.currentLocation = initialLocation;
     }
 
-    public void flyToward(Point2D point) {
+    public void moveTo(Point2D point) {
         this.currentLocation = point;
     }
 

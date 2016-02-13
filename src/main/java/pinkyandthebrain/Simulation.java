@@ -38,15 +38,22 @@ public class Simulation implements OrderCompletedListener {
     }
 
     public Warehouse addWarehouse(int id, int row, int column) {
-        Warehouse warehouse = new Warehouse(id, row, column, products.size());
+        Preconditions.checkArgument(products.size() > 0, "You must add all products before creating warehouses");
+        Warehouse warehouse = new Warehouse(id, requireValidLocation(row, column), products.size());
         warehouses.add(warehouse);
         return warehouse;
     }
 
     public Order addOrder(int orderId, int destinationRow, int destinationColumn) {
-        Order order = new Order(orderId, destinationRow, destinationColumn);
+        Order order = new Order(orderId, requireValidLocation(destinationRow, destinationColumn));
         orders.add(order);
         return order;
+    }
+
+    private Point2D requireValidLocation(int row, int column) {
+        Preconditions.checkArgument(row >= 0 && row < rows, "Invalid row " + row);
+        Preconditions.checkArgument(column >= 0 && column < columns, "Invalid column " + column);
+        return new Point2D(row, column);
     }
 
     public Product findProduct(int productType) {
@@ -66,6 +73,8 @@ public class Simulation implements OrderCompletedListener {
         }
 
         turn = -1;
+
+        player.initialize(this);
 
         while (hasPendingOrders()) {
             if (turn < deadline - 1) {
@@ -100,18 +109,6 @@ public class Simulation implements OrderCompletedListener {
                 return true;
         }
         return false;
-    }
-
-    public List<Warehouse> findWarehouseWith(Product product, int quantity) {
-        List<Warehouse> available = new ArrayList<>();
-        for (Warehouse warehouse : warehouses) {
-            if (warehouse.queryProductQuantity(product.getId()) >= quantity) {
-                available.add(warehouse);
-            }
-        }
-
-        Preconditions.checkArgument(!available.isEmpty(), "Could not find a warehouse with " + product);
-        return available;
     }
 
     public int getScore() {
@@ -163,5 +160,13 @@ public class Simulation implements OrderCompletedListener {
 
     public List<Order> getOrders() {
         return orders;
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public List<Warehouse> getWarehouses() {
+        return warehouses;
     }
 }

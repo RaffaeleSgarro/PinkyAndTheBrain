@@ -2,18 +2,20 @@ package pinkyandthebrain;
 
 import com.google.common.base.Preconditions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Warehouse {
 
     private final int id;
     private final Point2D location;
     private final int available[];
-    private final int reserved[];
+    private final List<RetrieveListener> retrieveListeners = new ArrayList<>();
 
-    public Warehouse(int id, int row, int col, int numberOfProducts) {
+    public Warehouse(int id, Point2D location, int numberOfProducts) {
         this.id = id;
-        this.location = new Point2D(row, col);
+        this.location = location;
         this.available = new int[numberOfProducts];
-        this.reserved = new int[numberOfProducts];
     }
 
     public int getId() {
@@ -33,19 +35,15 @@ public class Warehouse {
     }
 
     public void retrieve(Product product, int quantity) {
-        Preconditions.checkArgument(reserved[product.getId()] >= quantity);
-        reserved[product.getId()] -= quantity;
+        Preconditions.checkArgument(quantity > 0, "Quantity must be positive");
+        Preconditions.checkArgument(available[product.getId()] >= quantity);
+        available[product.getId()] -= quantity;
+        for (RetrieveListener listener : retrieveListeners) {
+            listener.onProductRetrieved(this, product, quantity);
+        }
     }
 
-    public void reserve(Product product, int quantity) {
-        Preconditions.checkArgument(available[product.getId()] >= quantity,
-                "This warehouse only contains "
-                        + available[product.getId()]
-                        + " of Product#" + product.getId()
-                        + " but " + quantity
-                        + " was requested");
-
-        available[product.getId()] -= quantity;
-        reserved[product.getId()] += quantity;
+    public void addRetrieveListener(RetrieveListener retrieveListener) {
+        this.retrieveListeners.add(retrieveListener);
     }
 }

@@ -12,12 +12,12 @@ public class Order {
     private final Point2D destination;
 
     private final List<Item> items = new ArrayList<>();
-    private int completedOnTurn;
+    private int completedOnTurn = -1;
     private List<OrderCompletedListener> listeners = new LinkedList<>();
 
-    public Order(int orderId, int destinationRow, int destinationColumn) {
+    public Order(int orderId, Point2D destination) {
         this.orderId = orderId;
-        this.destination = new Point2D(destinationRow, destinationColumn);
+        this.destination = destination;
     }
 
     public int getOrderId() {

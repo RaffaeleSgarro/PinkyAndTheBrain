@@ -1,0 +1,85 @@
+package pinkyandthebrain;
+
+import com.google.common.base.Preconditions;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import pinkyandthebrain.players.StaticPlayer;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Scanner;
+
+public class ScoreTestAgainstJudge {
+
+    private StaticPlayer player;
+    private Simulation simulation;
+    private Scanner fileScanner;
+
+    @Test
+    public void busyDay() throws Exception {
+        run("busy_day");
+        expectScore(63254);
+        expectTurns(112983);
+    }
+
+    @Test
+    public void motherOfAllWarehouses() throws Exception {
+        run("mother_of_all_warehouses");
+        expectScore(79317);
+        expectTurns(59041);
+    }
+
+    @Test
+    public void redundancy() throws Exception {
+        run("redundancy");
+        expectScore(78308);
+        expectTurns(64239);
+    }
+
+    private void run(String resource) throws Exception {
+        player = new StaticPlayer();
+        simulation = Loader.load(resource + ".in");
+
+        String submissionResourceName = "/submissions/" + resource + ".in.txt";
+        InputStream in = ScoreTestAgainstJudge.class.getResourceAsStream(submissionResourceName);
+        Preconditions.checkNotNull(in, "Could not find resource " + submissionResourceName);
+        fileScanner = new Scanner(new InputStreamReader(in, "ASCII"));
+        int lines = fileScanner.nextInt();
+        for (int i = 0; i < lines; i++) {
+            int droneId = fileScanner.nextInt();
+            String command = fileScanner.next();
+            switch (command) {
+                case "L":
+                    int warehouseId = fileScanner.nextInt();
+                    int loadProductId = fileScanner.nextInt();
+                    int loadQuantity = fileScanner.nextInt();
+                    player.submit(droneId, new Load(simulation.getWarehouses().get(warehouseId)
+                                                  , simulation.getProducts().get(loadProductId)
+                                                  , loadQuantity));
+                    break;
+                case "D":
+                    int orderId = fileScanner.nextInt();
+                    int deliverProductId = fileScanner.nextInt();
+                    int deliverQuantity = fileScanner.nextInt();
+                    player.submit(droneId, new Deliver(simulation.getOrders().get(orderId)
+                                                  , simulation.getProducts().get(deliverProductId)
+                                                  , deliverQuantity));
+                    break;
+                default:
+                    throw new RuntimeException("Unknown command symbol: " + command);
+            }
+        }
+
+        fileScanner.close();
+
+        simulation.start();
+    }
+
+    private void expectScore(int expectedScore) {
+        Assert.assertEquals(simulation.getScore(), expectedScore, "Wrong score");
+    }
+
+    private void expectTurns(int expectedTurns) {
+        Assert.assertEquals(simulation.countTurns(), expectedTurns, "Wrong number of turns");
+    }
+}

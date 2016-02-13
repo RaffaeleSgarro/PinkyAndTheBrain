@@ -9,7 +9,13 @@ import java.util.Scanner;
 
 public class Loader {
 
-    public static Simulation load(String simpleResourceName) throws Exception {
+    private final Player player;
+
+    public Loader(Player player) {
+        this.player = player;
+    }
+
+    public Simulation loadFromResource(String simpleResourceName) throws Exception {
         String resourceName = "/dataset/" + simpleResourceName;
 
         InputStream in = Main.class.getResourceAsStream(resourceName);
@@ -22,7 +28,7 @@ public class Loader {
         int deadline = scanner.nextInt();
         int droneCapacity = scanner.nextInt();
 
-        Simulation simulation = new Simulation(rows, columns, drones, deadline, droneCapacity, new DummyPlayer());
+        Simulation simulation = new Simulation(rows, columns, drones, deadline, droneCapacity, player);
 
         int numberOfProducts = scanner.nextInt();
 
@@ -64,6 +70,10 @@ public class Loader {
         scanner.close();
 
         return simulation;
+    }
+
+    public static Simulation load(String simpleResourceName) throws Exception {
+        return new Loader(new DummyPlayer()).loadFromResource(simpleResourceName);
     }
 
 }

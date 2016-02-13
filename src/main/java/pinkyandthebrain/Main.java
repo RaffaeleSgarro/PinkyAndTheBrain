@@ -15,7 +15,7 @@ public class Main {
 
     public static void main(String... args) throws Exception {
 
-        Preconditions.checkArgument(args.length > 1, "Usage: Main busy_day.in redundancy.in");
+        Preconditions.checkArgument(args.length >= 1, "Usage: Main busy_day.in redundancy.in");
 
         boolean isSaveToFile = "true".equals(System.getProperty("save"));
         String baseDirName = StringUtils.defaultIfBlank(System.getProperty("d"), "judge");

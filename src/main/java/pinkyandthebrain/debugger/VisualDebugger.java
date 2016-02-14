@@ -10,11 +10,11 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
-import javafx.scene.control.Slider;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -29,6 +29,10 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
         launch(VisualDebugger.class, args);
     }
 
+    private final ComboBox<String> input = new ComboBox<>();
+    private final Slider zoom = new Slider();
+    private final Spinner<Integer> fps = new Spinner<>();
+    private final Spinner<Integer> tps = new Spinner<>();
     private final Slider currentTurn = new Slider();
     private final SimulationCanvas canvas = new SimulationCanvas();
     private final Button start = new Button("Start");
@@ -45,13 +49,9 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
 
         HBox controls = new HBox();
         controls.setAlignment(Pos.CENTER_LEFT);
-        controls.getChildren().add(start);
-        controls.getChildren().add(pause);
-        controls.getChildren().add(currentTurn);
+        controls.getChildren().addAll(start, spacer(), pause, spacer(), currentTurn);
+        controls.setPadding(new Insets(10, 10, 10, 10));
         HBox.setHgrow(currentTurn, Priority.ALWAYS);
-        HBox.setMargin(currentTurn, new Insets(10, 10, 10, 10));
-        HBox.setMargin(start, new Insets(10, 10, 10, 10));
-        HBox.setMargin(pause, new Insets(10, 10, 10, 10));
 
         VBox player = new VBox();
         StackPane canvasWrapper = new StackPane();
@@ -64,7 +64,28 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
         VBox.setVgrow(canvasWrapper, Priority.ALWAYS);
         VBox.setVgrow(controls, Priority.SOMETIMES);
 
-        scene.setRoot(player);
+        VBox sidebar = new VBox();
+        sidebar.setPrefWidth(200);
+        sidebar.setPadding(new Insets(10, 10, 10, 10));
+        sidebar.getChildren().addAll(
+                  new Label("Input"), input
+                , spacer()
+                , new Label("Zoom"), zoom
+                , spacer()
+                , new Label("Frames/second"), fps
+                , spacer()
+                , new Label("Turns/secnod"), tps
+        );
+        input.setPrefWidth(Double.MAX_VALUE);
+        zoom.setPrefWidth(Double.MAX_VALUE);
+        fps.setPrefWidth(Double.MAX_VALUE);
+        tps.setPrefWidth(Double.MAX_VALUE);
+
+        HBox root = new HBox();
+        root.getChildren().addAll(player, sidebar);
+        HBox.setHgrow(player, Priority.ALWAYS);
+
+        scene.setRoot(root);
 
         primaryStage.setTitle("Visual debugger");
         primaryStage.setScene(scene);
@@ -99,6 +120,13 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
         simulationThread.setDaemon(true);
         simulationThread.setName("simulation-thread");
         simulationThread.start();
+    }
+
+    private static Node spacer() {
+        Region node = new Region();
+        node.setPrefWidth(10);
+        node.setPrefHeight(10);
+        return node;
     }
 
     @Override
@@ -191,9 +219,9 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
             GraphicsContext ctx = getGraphicsContext2D();
 
             ctx.save();
-            Affine affine = new Affine();
-            affine.setToIdentity();
-            ctx.setTransform(affine);
+            Affine identity = new Affine();
+            identity.setToIdentity();
+            ctx.setTransform(identity);
             ctx.clearRect(0, 0, getWidth(), getHeight());
             ctx.restore();
 
@@ -224,8 +252,13 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
             }
 
             ctx.restore();
+
+            ctx.save();
+            identity.setToIdentity();
+            ctx.setTransform(identity);
             ctx.setFont(Font.font(20));
             ctx.fillText("Score: " + simulation.getScore() + ", turn " + (simulation.getTurn() + 1) + " of " + simulation.getDeadline(), 30, 30);
+            ctx.restore();
         }
 
         @Override

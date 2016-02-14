@@ -167,6 +167,8 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
         private final Object renderLock = new Object();
         private final long lastRenderTimestamp = 0;
 
+        private Theme theme = new Theme();
+
         private Simulation simulation;
 
         private volatile int fps = 24;
@@ -222,33 +224,35 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
             Affine identity = new Affine();
             identity.setToIdentity();
             ctx.setTransform(identity);
-            ctx.clearRect(0, 0, getWidth(), getHeight());
+            ctx.setFill(theme.background);
+            ctx.fillRect(0, 0, getWidth(), getHeight());
             ctx.restore();
 
             ctx.save();
             ctx.scale(zoom.get(), zoom.get());
 
-            for (Warehouse warehouse : simulation.getWarehouses()) {
-                ctx.setFill(Color.BLUE);
-                ctx.fillOval(warehouse.getLocation().col(), warehouse.getLocation().row(), 4, 4);
-            }
-
-            for (Order order : simulation.getOrders()) {
-                ctx.setFill(order.isCompleted() ? Color.GREEN : Color.ORANGE);
-                ctx.fillOval(order.getDestination().col(), order.getDestination().row(), 2, 2);
-            }
-
             for (Drone drone : simulation.getDrones()) {
-                ctx.setStroke(Color.GREY);
+                ctx.setStroke(theme.route);
                 ctx.setLineDashes(3, 3);
                 Point2D from = drone.getRoute().getFrom();
                 Point2D to = drone.getRoute().getTo();
                 ctx.strokeLine(from.col(), from.row(), to.col(), to.row());
             }
 
+
+            for (Warehouse warehouse : simulation.getWarehouses()) {
+                ctx.setFill(theme.warehouse);
+                ctx.fillOval(warehouse.getLocation().col() - 2, warehouse.getLocation().row() - 2, 4, 4);
+            }
+
+            for (Order order : simulation.getOrders()) {
+                ctx.setFill(order.isCompleted() ? theme.orderCompleted : theme.orderPending);
+                ctx.fillOval(order.getDestination().col() - 1, order.getDestination().row() - 1, 2, 2);
+            }
+
             for (Drone drone : simulation.getDrones()) {
-                ctx.setFill(Color.BLACK);
-                ctx.fillOval(drone.getPosition().col(), drone.getPosition().row(), 3, 3);
+                ctx.setFill(theme.drone);
+                ctx.fillOval(drone.getPosition().col() - 1.5, drone.getPosition().row() - 1.5, 3, 3);
             }
 
             ctx.restore();
@@ -257,6 +261,7 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
             identity.setToIdentity();
             ctx.setTransform(identity);
             ctx.setFont(Font.font(20));
+            ctx.setFill(theme.osd);
             ctx.fillText("Score: " + simulation.getScore() + ", turn " + (simulation.getTurn() + 1) + " of " + simulation.getDeadline(), 30, 30);
             ctx.restore();
         }

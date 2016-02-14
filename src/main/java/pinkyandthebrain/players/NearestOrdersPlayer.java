@@ -54,25 +54,25 @@ public class NearestOrdersPlayer implements Player, RetrieveListener {
             }
 
             // Do not remove yet, in case we don't have enough turns to deliver
-            Item item = unscheduled.peek();
 
-            List<Warehouse> availableWarehouses = findWarehouseWith(item.getProduct(), 1);
+            Item item = null;
             Warehouse warehouse = null;
             double bestDistance = Double.MAX_VALUE;
-            for (Warehouse available : availableWarehouses) {
-                double distance = drone.getPosition().distanceTo(available.getLocation())
-                        + available.getLocation().distanceTo(item.getOrder().getDestination());
-                if (distance < bestDistance) {
-                    bestDistance = distance;
-                    warehouse = available;
+
+            for (Item i : unscheduled) {
+                List<Warehouse> availableWarehouses = findWarehouseWith(i.getProduct(), 1);
+                for (Warehouse available : availableWarehouses) {
+                    double distance = drone.getPosition().distanceTo(available.getLocation())
+                            + available.getLocation().distanceTo(i.getOrder().getDestination());
+                    if (distance < bestDistance) {
+                        bestDistance = distance;
+                        warehouse = available;
+                        item = i;
+                    }
                 }
             }
 
-            if (simulation.getTurn() + 1 + Math.ceil(bestDistance) + 1 >= simulation.getDeadline()) {
-                continue;
-            }
-
-            unscheduled.remove();
+            unscheduled.remove(item);
             reserve(warehouse, item.getProduct(), 1);
 
             drone.submit(new Load(warehouse, item.getProduct(), 1));

@@ -17,7 +17,17 @@ public class DummyPlayer implements Player, RetrieveListener {
         reserved = new int[simulation.getWarehouses().size()][simulation.getProducts().size()];
         unscheduled = new LinkedList<>();
 
-        for (Order order : simulation.getOrders()) {
+        List<Order> orders = new ArrayList<>();
+        orders.addAll(simulation.getOrders());
+
+        Collections.sort(orders, new Comparator<Order>() {
+            @Override
+            public int compare(Order thisOrder, Order thatOrder) {
+                return thisOrder.getItems().size() - thatOrder.getItems().size();
+            }
+        });
+
+        for (Order order : orders) {
             for (Item item : order.getItems()) {
                 unscheduled.add(item);
             }

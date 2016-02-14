@@ -29,6 +29,9 @@ public class VisualDebugger extends Application implements Ticker {
     private final Button start = new Button("Start");
     private final Button pause = new Button("Pause");
 
+    private long lastTickNanos = 0;
+    private int turnsPerSecond = 100;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         Scene scene = new Scene(new Group(), 800, 600);
@@ -81,11 +84,15 @@ public class VisualDebugger extends Application implements Ticker {
 
     @Override
     public void tick() {
-        try {
-            // Real slow Thread.sleep(20);
-            Thread.sleep(0, 400);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        // Thread.sleep() is unreliable with nanoseconds
+        while (true) {
+            long target = 1_000_000_000 / turnsPerSecond; // 1 seconds in nanoseconds
+            long now = System.nanoTime();
+
+            if (now - lastTickNanos >= target) {
+                lastTickNanos = now;
+                return;
+            }
         }
     }
 

@@ -25,7 +25,7 @@ public class Drone {
         this.currentLocation = initialLocation;
     }
 
-    public void moveTo(Point2D point) {
+    protected void moveTo(Point2D point) {
         this.currentLocation = point;
     }
 
@@ -46,11 +46,11 @@ public class Drone {
         pendingCommands.add(command);
     }
 
-    public List<Command> getExecutedCommands() {
+    protected List<Command> getExecutedCommands() {
         return executedCommands;
     }
 
-    public void executeNextCommand() {
+    protected void executeNextCommand() {
         Preconditions.checkArgument(!started || hasMoreWork(), "This drone has been shut down!");
 
         if (!started) {
@@ -80,13 +80,13 @@ public class Drone {
         this.shutdown = true;
     }
 
-    public void deliver(Product product, Order order) {
+    protected void deliver(Product product, Order order) {
         boolean removed = inventory.remove(product);
         Preconditions.checkArgument(removed, "Drone " + id + " inventory does not contain " + product);
         order.deliver(product);
     }
 
-    public void load(Product product, int quantity) {
+    protected void load(Product product, int quantity) {
         Preconditions.checkArgument(totalWeight() + (product.getWeight() * quantity) <= capacity);
         for (int i = 0; i < quantity; i++) {
             inventory.add(product);
@@ -105,7 +105,7 @@ public class Drone {
         return route;
     }
 
-    public void setRoute(Route route) {
+    protected void setRoute(Route route) {
         this.route = route;
     }
 

@@ -25,8 +25,8 @@ public class ScoreTestAgainstJudge {
     @Test
     public void motherOfAllWarehouses() throws Exception {
         run("mother_of_all_warehouses");
-        expectScore(79317);
-        expectTurns(59041);
+        expectScore(59041);
+        expectTurns(79317);
     }
 
     @Test
@@ -38,7 +38,8 @@ public class ScoreTestAgainstJudge {
 
     private void run(String resource) throws Exception {
         player = new StaticPlayer();
-        simulation = Loader.load(resource + ".in");
+        Loader loader = new Loader(player);
+        simulation = loader.loadFromResource(resource + ".in");
 
         String submissionResourceName = "/submissions/" + resource + ".in.txt";
         InputStream in = ScoreTestAgainstJudge.class.getResourceAsStream(submissionResourceName);

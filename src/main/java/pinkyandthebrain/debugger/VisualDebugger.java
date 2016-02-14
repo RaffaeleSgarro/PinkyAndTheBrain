@@ -105,8 +105,12 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
     public void tick() {
         // Thread.sleep() is unreliable with nanoseconds
         while (true) {
-            if (paused) {
-                continue;
+            while (paused) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             long expectedTickDuration = 1_000_000_000 / turnsPerSecond; // 1 seconds in nanoseconds

@@ -40,9 +40,10 @@ public class Order {
         this.completedOnTurn = completedOnTurn;
     }
 
-    public int getScoreAtTurn(int turn) {
-        double numberOfTurns = turn + 1;
-        return (int) Math.ceil((numberOfTurns - getCompletedOnTurn()) / numberOfTurns * 100);
+    public int getScore(int numberOfTurns) {
+        Preconditions.checkArgument(numberOfTurns >= completedOnTurn, "Order was completed on turn " + getCompletedOnTurn() + " so no score is available at " + numberOfTurns);
+        double score = (numberOfTurns - getCompletedOnTurn()) * 100d / numberOfTurns;
+        return (int) Math.ceil(score);
     }
 
     public void deliver(Product product) {

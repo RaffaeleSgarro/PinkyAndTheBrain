@@ -112,9 +112,10 @@ public class Simulation implements OrderCompletedListener {
 
     public int getScore() {
         int score = 0;
+        int numberOfTurns = countTurns();
         for (Order order : orders) {
             if (order.isCompleted()) {
-                score += order.getScoreAtTurn(turn);
+                score += order.getScore(numberOfTurns);
             }
         }
         return score;

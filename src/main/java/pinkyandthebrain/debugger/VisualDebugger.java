@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -12,13 +13,14 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import pinkyandthebrain.*;
 
-public class VisualDebugger extends Application implements Ticker {
+public class VisualDebugger extends Application implements Ticker, TurnListener {
 
     public static void main(String... args) {
         launch(VisualDebugger.class, args);
@@ -29,8 +31,10 @@ public class VisualDebugger extends Application implements Ticker {
     private final Button start = new Button("Start");
     private final Button pause = new Button("Pause");
 
+    private volatile boolean paused;
+    private volatile int turnsPerSecond = 500;
+
     private long lastTickNanos = 0;
-    private int turnsPerSecond = 100;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -55,12 +59,21 @@ public class VisualDebugger extends Application implements Ticker {
 
         player.getChildren().add(controls);
         VBox.setVgrow(canvasWrapper, Priority.ALWAYS);
+        VBox.setVgrow(controls, Priority.SOMETIMES);
 
         scene.setRoot(player);
 
         primaryStage.setTitle("Visual debugger");
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        pause.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                paused = !paused;
+                pause.setText(paused ? "Play" : "Pause");
+            }
+        });
 
         Thread simulationThread = new Thread(new Runnable() {
             @Override
@@ -69,6 +82,9 @@ public class VisualDebugger extends Application implements Ticker {
                     Simulation simulation = Loader.load("busy_day.in");
                     canvas.setSimulation(simulation);
                     simulation.setTicker(VisualDebugger.this);
+                    currentTurn.setMin(0);
+                    currentTurn.setMax(simulation.getDeadline() - 1);
+                    simulation.addTurnListener(VisualDebugger.this);
                     simulation.start();
                     System.out.println("Simulation ended");
                 } catch (Exception e) {
@@ -89,19 +105,31 @@ public class VisualDebugger extends Application implements Ticker {
             long target = 1_000_000_000 / turnsPerSecond; // 1 seconds in nanoseconds
             long now = System.nanoTime();
 
-            if (now - lastTickNanos >= target) {
+            if (!paused && now - lastTickNanos >= target) {
                 lastTickNanos = now;
                 return;
             }
         }
     }
 
+    @Override
+    public void onSimulationTurn(final Simulation simulation) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                currentTurn.adjustValue(simulation.getTurn());
+            }
+        });
+    }
+
     private class SimulationCanvas extends Canvas implements ChangeListener<Number>, TurnListener {
 
-        private Simulation simulation;
-        private int fps = 24;
         private final Object renderLock = new Object();
         private final long lastRenderTimestamp = 0;
+
+        private Simulation simulation;
+
+        private volatile int fps = 24;
         private volatile boolean rendered;
 
         public SimulationCanvas() {
@@ -150,7 +178,7 @@ public class VisualDebugger extends Application implements Ticker {
             }
 
             ctx.setFont(Font.font(20));
-            ctx.fillText("Score: " + simulation.getScore() + ", turn: " + simulation.getTurn(), 30, 30);
+            ctx.fillText("Score: " + simulation.getScore() + ", turn " + simulation.getTurn() + 1 + " of " + simulation.getDeadline(), 30, 30);
         }
 
         @Override
@@ -160,12 +188,12 @@ public class VisualDebugger extends Application implements Ticker {
 
         @Override
         public double prefWidth(double height) {
-            return getWidth();
+            return -1;
         }
 
         @Override
         public double prefHeight(double width) {
-            return getHeight();
+            return -1;
         }
 
         @Override

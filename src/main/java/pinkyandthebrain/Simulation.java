@@ -75,8 +75,6 @@ public class Simulation implements OrderCompletedListener {
             order.addCompletedListener(this);
         }
 
-        turn = -1;
-
         player.initialize(this);
 
         // TODO draw initial

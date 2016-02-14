@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pinkyandthebrain.players.DummyPlayer;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,7 +31,8 @@ public class Main {
         int score = 0;
 
         for (String arg : args) {
-            Simulation simulation = Loader.load(arg);
+
+            Simulation simulation = new Loader(new DummyPlayer()).loadFromResource(arg);
 
             log.info("Loaded simulation parameters from classpath resource {}", arg);
 

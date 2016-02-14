@@ -1,7 +1,6 @@
 package pinkyandthebrain;
 
 import com.google.common.base.Preconditions;
-import pinkyandthebrain.players.DummyPlayer;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -70,10 +69,6 @@ public class Loader {
         scanner.close();
 
         return simulation;
-    }
-
-    public static Simulation load(String simpleResourceName) throws Exception {
-        return new Loader(new DummyPlayer()).loadFromResource(simpleResourceName);
     }
 
 }

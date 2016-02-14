@@ -17,6 +17,8 @@ import javafx.scene.text.Font;
 import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
 import pinkyandthebrain.*;
+import pinkyandthebrain.players.DummyPlayer;
+import pinkyandthebrain.players.NearestOrdersPlayer;
 
 public class VisualDebugger extends Application implements Ticker, TurnListener {
 
@@ -25,6 +27,7 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
     }
 
     private final ComboBox<String> input = new ComboBox<>();
+    private final ComboBox<String> player = new ComboBox<>();
     private final Slider zoom = new Slider();
     private final Spinner<Integer> fps = new Spinner<>();
     private final Spinner<Integer> tps = new Spinner<>();
@@ -48,14 +51,14 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
         controls.setPadding(new Insets(10, 10, 10, 10));
         HBox.setHgrow(currentTurn, Priority.ALWAYS);
 
-        VBox player = new VBox();
+        VBox gamePlayer = new VBox();
         StackPane canvasWrapper = new StackPane();
-        player.getChildren().add(canvasWrapper);
+        gamePlayer.getChildren().add(canvasWrapper);
         canvasWrapper.getChildren().add(canvas);
         canvas.widthProperty().bind(canvasWrapper.widthProperty());
         canvas.heightProperty().bind(canvasWrapper.heightProperty());
 
-        player.getChildren().add(controls);
+        gamePlayer.getChildren().add(controls);
         VBox.setVgrow(canvasWrapper, Priority.ALWAYS);
         VBox.setVgrow(controls, Priority.SOMETIMES);
 
@@ -64,6 +67,8 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
         sidebar.setPadding(new Insets(10, 10, 10, 10));
         sidebar.getChildren().addAll(
                   new Label("Input"), input
+                , spacer()
+                , new Label("Player"), player
                 , spacer()
                 , new Label("Zoom"), zoom
                 , spacer()
@@ -77,8 +82,8 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
         tps.setPrefWidth(Double.MAX_VALUE);
 
         HBox root = new HBox();
-        root.getChildren().addAll(player, sidebar);
-        HBox.setHgrow(player, Priority.ALWAYS);
+        root.getChildren().addAll(gamePlayer, sidebar);
+        HBox.setHgrow(gamePlayer, Priority.ALWAYS);
 
         scene.setRoot(root);
 
@@ -88,6 +93,9 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
 
         input.getItems().addAll("busy_day.in", "mother_of_all_warehouses.in", "redundancy.in");
         input.setValue("busy_day.in");
+
+        player.getItems().addAll("Dummy", "Nearest orders");
+        player.setValue("Dummy");
 
         zoom.setValue(1);
         zoom.setMin(1);
@@ -115,13 +123,27 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
         start();
     }
 
+    private Player buildPlayer() {
+        switch (player.getValue()) {
+            case "Dummy":
+                return new DummyPlayer();
+            case "Nearest orders":
+                return new NearestOrdersPlayer();
+            default:
+                throw new RuntimeException("Player value not mapped to player implementation: " + player.getValue());
+        }
+    }
+
     private void start() {
 
         final String simulationName = input.getValue();
 
+        final Player player = buildPlayer();
+
         Thread simulationThread = new Thread(() -> {
             try {
-                simulation = Loader.load(simulationName);
+                Loader loader = new Loader(player);
+                simulation = loader.loadFromResource(simulationName);
                 currentTurn.setMin(0);
                 currentTurn.setMax(simulation.getDeadline());
                 simulation.setTicker(VisualDebugger.this);

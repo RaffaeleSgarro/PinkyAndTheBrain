@@ -81,12 +81,7 @@ public class Simulation implements OrderCompletedListener {
 
         // TODO draw initial
 
-        while (true) {
-            if (turn < deadline - 1) {
-                turn++;
-            } else {
-                break;
-            }
+        for (turn = 0; turn < deadline; turn++) {
 
             ticker.tick();
             player.move(this);

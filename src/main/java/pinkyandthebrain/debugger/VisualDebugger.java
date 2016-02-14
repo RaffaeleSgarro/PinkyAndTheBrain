@@ -229,10 +229,9 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
                 ctx.strokeLine(from.col(), from.row(), to.col(), to.row());
             }
 
-
             for (Warehouse warehouse : simulation.getWarehouses()) {
                 ctx.setFill(theme.warehouse);
-                ctx.fillOval(warehouse.getLocation().col() - 2, warehouse.getLocation().row() - 2, 4, 4);
+                ctx.fillOval(warehouse.getLocation().col() - 3, warehouse.getLocation().row() - 3, 6, 6);
             }
 
             for (Order order : simulation.getOrders()) {
@@ -242,7 +241,7 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
 
             for (Drone drone : simulation.getDrones()) {
                 ctx.setFill(theme.drone);
-                ctx.fillOval(drone.getPosition().col() - 1.5, drone.getPosition().row() - 1.5, 3, 3);
+                ctx.fillOval(drone.getPosition().col() - 2, drone.getPosition().row() - 2, 4, 4);
             }
 
             ctx.restore();

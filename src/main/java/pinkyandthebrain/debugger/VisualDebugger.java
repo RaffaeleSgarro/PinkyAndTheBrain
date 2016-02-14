@@ -2,6 +2,8 @@ package pinkyandthebrain.debugger;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -17,6 +19,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
 import pinkyandthebrain.*;
 
@@ -32,7 +35,7 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
     private final Button pause = new Button("Pause");
 
     private volatile boolean paused;
-    private volatile int turnsPerSecond = 500;
+    private volatile int turnsPerSecond = 96;
 
     private long lastTickNanos = 0;
 
@@ -81,9 +84,9 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
                 try {
                     Simulation simulation = Loader.load("busy_day.in");
                     canvas.setSimulation(simulation);
-                    simulation.setTicker(VisualDebugger.this);
                     currentTurn.setMin(0);
-                    currentTurn.setMax(simulation.getDeadline() - 1);
+                    currentTurn.setMax(simulation.getDeadline());
+                    simulation.setTicker(VisualDebugger.this);
                     simulation.addTurnListener(VisualDebugger.this);
                     simulation.start();
                     System.out.println("Simulation ended");
@@ -102,12 +105,17 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
     public void tick() {
         // Thread.sleep() is unreliable with nanoseconds
         while (true) {
-            long target = 1_000_000_000 / turnsPerSecond; // 1 seconds in nanoseconds
-            long now = System.nanoTime();
+            if (paused) {
+                continue;
+            }
 
-            if (!paused && now - lastTickNanos >= target) {
+            long expectedTickDuration = 1_000_000_000 / turnsPerSecond; // 1 seconds in nanoseconds
+            long now = System.nanoTime();
+            long timeSinceLastTick = now - lastTickNanos;
+
+            if (timeSinceLastTick > expectedTickDuration) {
                 lastTickNanos = now;
-                return;
+                break;
             }
         }
     }
@@ -132,9 +140,34 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
         private volatile int fps = 24;
         private volatile boolean rendered;
 
+        public IntegerProperty zoom = new SimpleIntegerProperty(1);
+
+        private double dragStartX;
+        private double dragStartY;
+
         public SimulationCanvas() {
             widthProperty().addListener(this);
             heightProperty().addListener(this);
+
+            setOnMousePressed(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event) {
+                    dragStartX = event.getX();
+                    dragStartY = event.getY();
+                }
+            });
+
+            setOnMouseDragged(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event) {
+                    double x = dragStartX - event.getX();
+                    double y = dragStartY - event.getY();
+                    getGraphicsContext2D().translate(x, y);
+                    dragStartX = event.getX();
+                    dragStartY = event.getY();
+                    render();
+                }
+            });
         }
 
         public void setSimulation(Simulation simulation) {
@@ -150,9 +183,18 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
         public void render() {
             if (simulation == null)
                 return;
+
             GraphicsContext ctx = getGraphicsContext2D();
 
+            ctx.save();
+            Affine affine = new Affine();
+            affine.setToIdentity();
+            ctx.setTransform(affine);
             ctx.clearRect(0, 0, getWidth(), getHeight());
+            ctx.restore();
+
+            ctx.save();
+            ctx.scale(zoom.get(), zoom.get());
 
             for (Warehouse warehouse : simulation.getWarehouses()) {
                 ctx.setFill(Color.BLUE);
@@ -177,8 +219,9 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
                 ctx.fillOval(drone.getPosition().col(), drone.getPosition().row(), 3, 3);
             }
 
+            ctx.restore();
             ctx.setFont(Font.font(20));
-            ctx.fillText("Score: " + simulation.getScore() + ", turn " + simulation.getTurn() + 1 + " of " + simulation.getDeadline(), 30, 30);
+            ctx.fillText("Score: " + simulation.getScore() + ", turn " + (simulation.getTurn() + 1) + " of " + simulation.getDeadline(), 30, 30);
         }
 
         @Override
@@ -199,6 +242,10 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
         @Override
         public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
             render();
+        }
+
+        public IntegerProperty zoomProperty() {
+            return zoom;
         }
 
         @Override

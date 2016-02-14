@@ -3,18 +3,26 @@ package pinkyandthebrain.players;
 import com.google.common.base.Preconditions;
 import pinkyandthebrain.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class DummyPlayer implements Player, RetrieveListener {
 
     private int[][] reserved;
+    private Queue<Item> unscheduled;
     private Simulation simulation;
 
     @Override
     public void initialize(Simulation simulation) {
         this.simulation = simulation;
         reserved = new int[simulation.getWarehouses().size()][simulation.getProducts().size()];
+        unscheduled = new LinkedList<>();
+
+        for (Order order : simulation.getOrders()) {
+            for (Item item : order.getItems()) {
+                unscheduled.add(item);
+            }
+        }
+
         for (Warehouse warehouse : simulation.getWarehouses()) {
             warehouse.addRetrieveListener(this);
         }
@@ -22,7 +30,7 @@ public class DummyPlayer implements Player, RetrieveListener {
 
     @Override
     public void move(Simulation simulation) {
-        if (!hasUnscheduledOrders()) {
+        if (unscheduled.isEmpty()) {
             return;
         }
 
@@ -31,13 +39,12 @@ public class DummyPlayer implements Player, RetrieveListener {
                 continue;
             }
 
-            Item item = null;
-
-            for (Order order : simulation.getOrders()) {
-                if (!order.isScheduled()) {
-                    item = order.findFirstUnscheduled();
-                }
+            if (unscheduled.isEmpty()) {
+                return;
             }
+
+            // Do not remove yet, in case we don't have enough turns to deliver
+            Item item = unscheduled.peek();
 
             List<Warehouse> availableWarehouses = findWarehouseWith(item.getProduct(), 1);
             Warehouse warehouse = null;
@@ -55,14 +62,13 @@ public class DummyPlayer implements Player, RetrieveListener {
                 continue;
             }
 
-            item.setScheduled(true);
+            unscheduled.remove();
             reserve(warehouse, item.getProduct(), 1);
 
             drone.submit(new Load(warehouse, item.getProduct(), 1));
             drone.submit(new Deliver(item.getOrder(), item.getProduct(), 1));
         }
     }
-
 
     public List<Warehouse> findWarehouseWith(Product product, int quantity) {
         List<Warehouse> available = new ArrayList<>();
@@ -91,14 +97,5 @@ public class DummyPlayer implements Player, RetrieveListener {
     @Override
     public void onProductRetrieved(Warehouse warehouse, Product product, int quantity) {
         reserved[warehouse.getId()][product.getId()] -= quantity;
-    }
-
-    private boolean hasUnscheduledOrders() {
-        for (Order order : simulation.getOrders()) {
-            if (!order.isScheduled()) {
-                return true;
-            }
-        }
-        return false;
     }
 }

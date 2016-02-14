@@ -45,25 +45,6 @@ public class Order {
         return (int) Math.ceil((numberOfTurns - getCompletedOnTurn()) / numberOfTurns * 100);
     }
 
-    public boolean isScheduled() {
-        for (Item item : items) {
-            if (!item.isScheduled()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public Item findFirstUnscheduled() {
-        for (Item item : items) {
-            if (!item.isScheduled()) {
-                return item;
-            }
-        }
-        throw new RuntimeException("All items in this order are scheduled");
-    }
-
     public void deliver(Product product) {
         Item undelivered = null;
         for (Item item : items) {
@@ -93,5 +74,9 @@ public class Order {
 
     public void addCompletedListener(OrderCompletedListener listener) {
         this.listeners.add(listener);
+    }
+
+    public List<Item> getItems() {
+        return items;
     }
 }

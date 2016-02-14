@@ -36,7 +36,7 @@ public class Main {
 
             simulation.start();
 
-            log.info("Simulation {} took {} turns and scored: {}", arg, simulation.countTurns(), simulation.getScore());
+            log.info("Simulation {} scored: {}", arg, simulation.getScore());
 
             if (isSaveToFile) {
                 File commandsFile = new File(baseDir, arg + ".txt");

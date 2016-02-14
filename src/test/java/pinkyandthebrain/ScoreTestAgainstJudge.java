@@ -19,21 +19,18 @@ public class ScoreTestAgainstJudge {
     public void busyDay() throws Exception {
         run("busy_day");
         expectScore(63254);
-        expectTurns(112983);
     }
 
     @Test
     public void motherOfAllWarehouses() throws Exception {
         run("mother_of_all_warehouses");
         expectScore(59041);
-        expectTurns(79317);
     }
 
     @Test
     public void redundancy() throws Exception {
         run("redundancy");
         expectScore(78308);
-        expectTurns(64239);
     }
 
     private void run(String resource) throws Exception {
@@ -78,9 +75,5 @@ public class ScoreTestAgainstJudge {
 
     private void expectScore(int expectedScore) {
         Assert.assertEquals(simulation.getScore(), expectedScore, "Wrong score");
-    }
-
-    private void expectTurns(int expectedTurns) {
-        Assert.assertEquals(simulation.countTurns(), expectedTurns, "Wrong number of turns");
     }
 }

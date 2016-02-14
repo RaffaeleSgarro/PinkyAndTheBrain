@@ -81,14 +81,15 @@ public class Simulation implements OrderCompletedListener {
 
         // TODO draw initial
 
-        while (hasPendingOrders()) {
-            ticker.tick();
+        while (true) {
             if (turn < deadline - 1) {
                 turn++;
-                player.move(this);
             } else {
                 break;
             }
+
+            ticker.tick();
+            player.move(this);
 
             for (Drone drone : drones) {
                 if (!drone.isShutDown()) {
@@ -102,20 +103,11 @@ public class Simulation implements OrderCompletedListener {
         }
     }
 
-    private boolean hasPendingOrders() {
-        for (Order order : orders) {
-            if (!order.isCompleted())
-                return true;
-        }
-        return false;
-    }
-
     public int getScore() {
         int score = 0;
-        int numberOfTurns = countTurns();
         for (Order order : orders) {
             if (order.isCompleted()) {
-                score += order.getScore(numberOfTurns);
+                score += order.getScore(deadline);
             }
         }
         return score;
@@ -135,10 +127,6 @@ public class Simulation implements OrderCompletedListener {
         for (String command : commands) {
             out.println(command);
         }
-    }
-
-    public int countTurns() {
-        return turn + 1;
     }
 
     @Override

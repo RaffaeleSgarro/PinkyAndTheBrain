@@ -28,8 +28,6 @@ public class SimulationScoreTest {
         player.submit(0, new Deliver(order, product, 1));
 
         simulation.start();
-
-        Assert.assertEquals(simulation.countTurns(), 102);
     }
 
 

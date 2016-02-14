@@ -2,11 +2,8 @@ package pinkyandthebrain.debugger;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -15,9 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
@@ -38,8 +33,8 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
     private final Button start = new Button("Start");
     private final Button pause = new Button("Pause");
 
+    private Simulation simulation;
     private volatile boolean paused;
-    private volatile int turnsPerSecond = 96;
 
     private long lastTickNanos = 0;
 
@@ -91,29 +86,49 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        pause.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                paused = !paused;
-                pause.setText(paused ? "Play" : "Pause");
-            }
+        input.getItems().addAll("busy_day.in", "mother_of_all_warehouses.in", "redundancy.in");
+        input.setValue("busy_day.in");
+
+        zoom.setValue(1);
+        zoom.setMin(1);
+        zoom.setMax(5);
+
+        fps.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(24, 96, 24, 24));
+
+        tps.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(100, 10000, 100, 1000));
+
+        pause.setOnMouseClicked(event -> {
+            paused = !paused;
+            pause.setText(paused ? "Play" : "Pause");
         });
 
-        Thread simulationThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Simulation simulation = Loader.load("busy_day.in");
-                    canvas.setSimulation(simulation);
-                    currentTurn.setMin(0);
-                    currentTurn.setMax(simulation.getDeadline());
-                    simulation.setTicker(VisualDebugger.this);
-                    simulation.addTurnListener(VisualDebugger.this);
-                    simulation.start();
-                    System.out.println("Simulation ended");
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+        start.setOnMouseClicked((evt) -> {
+            if (simulation != null) {
+                simulation.stop();
+            }
+
+            simulation = null;
+
+            start();
+        });
+
+        start();
+    }
+
+    private void start() {
+
+        final String simulationName = input.getValue();
+
+        Thread simulationThread = new Thread(() -> {
+            try {
+                simulation = Loader.load(simulationName);
+                currentTurn.setMin(0);
+                currentTurn.setMax(simulation.getDeadline());
+                simulation.setTicker(VisualDebugger.this);
+                simulation.addTurnListener(VisualDebugger.this);
+                simulation.start();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         });
 
@@ -141,7 +156,7 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
                 }
             }
 
-            long expectedTickDuration = 1_000_000_000 / turnsPerSecond; // 1 seconds in nanoseconds
+            long expectedTickDuration = 1_000_000_000 / tps.getValue();
             long now = System.nanoTime();
             long timeSinceLastTick = now - lastTickNanos;
 
@@ -154,12 +169,8 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
 
     @Override
     public void onSimulationTurn(final Simulation simulation) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                currentTurn.adjustValue(simulation.getTurn());
-            }
-        });
+        canvas.onSimulationTurn(simulation);
+        Platform.runLater(() -> currentTurn.adjustValue(simulation.getTurn()));
     }
 
     private class SimulationCanvas extends Canvas implements ChangeListener<Number>, TurnListener {
@@ -169,12 +180,7 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
 
         private Theme theme = new Theme();
 
-        private Simulation simulation;
-
-        private volatile int fps = 24;
         private volatile boolean rendered;
-
-        public IntegerProperty zoom = new SimpleIntegerProperty(1);
 
         private double dragStartX;
         private double dragStartY;
@@ -183,35 +189,19 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
             widthProperty().addListener(this);
             heightProperty().addListener(this);
 
-            setOnMousePressed(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent event) {
-                    dragStartX = event.getX();
-                    dragStartY = event.getY();
-                }
+            setOnMousePressed(event -> {
+                dragStartX = event.getX();
+                dragStartY = event.getY();
             });
 
-            setOnMouseDragged(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent event) {
-                    double x = dragStartX - event.getX();
-                    double y = dragStartY - event.getY();
-                    getGraphicsContext2D().translate(x, y);
-                    dragStartX = event.getX();
-                    dragStartY = event.getY();
-                    render();
-                }
+            setOnMouseDragged(event -> {
+                double x = dragStartX - event.getX();
+                double y = dragStartY - event.getY();
+                getGraphicsContext2D().translate(x, y);
+                dragStartX = event.getX();
+                dragStartY = event.getY();
+                render();
             });
-        }
-
-        public void setSimulation(Simulation simulation) {
-            if (this.simulation != null) {
-                this.simulation.removeTurnListener(this);
-            }
-
-            simulation.addTurnListener(this);
-
-            this.simulation = simulation;
         }
 
         public void render() {
@@ -229,7 +219,7 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
             ctx.restore();
 
             ctx.save();
-            ctx.scale(zoom.get(), zoom.get());
+            ctx.scale(zoom.getValue(), zoom.getValue());
 
             for (Drone drone : simulation.getDrones()) {
                 ctx.setStroke(theme.route);
@@ -286,25 +276,18 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
             render();
         }
 
-        public IntegerProperty zoomProperty() {
-            return zoom;
-        }
-
         @Override
         public void onSimulationTurn(Simulation simulation) {
             long currentTimeMillis = System.currentTimeMillis();
             long timeSinceLastRenderMillis = currentTimeMillis - lastRenderTimestamp;
-            if (timeSinceLastRenderMillis >= 1000 / fps) {
+            if (timeSinceLastRenderMillis >= 1000 / fps.getValue()) {
                 rendered = false;
 
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        synchronized (renderLock) {
-                            render();
-                            rendered = true;
-                            renderLock.notifyAll();
-                        }
+                Platform.runLater(() -> {
+                    synchronized (renderLock) {
+                        render();
+                        rendered = true;
+                        renderLock.notifyAll();
                     }
                 });
 

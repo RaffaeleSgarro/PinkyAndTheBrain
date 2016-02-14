@@ -25,6 +25,8 @@ public class Simulation implements OrderCompletedListener {
 
     private int turn;
 
+    private volatile boolean stop;
+
     public Simulation(int rows, int columns, int numberOfDrones, int deadline, int droneCapacity, Player player) {
         this.rows = rows;
         this.columns = columns;
@@ -80,6 +82,9 @@ public class Simulation implements OrderCompletedListener {
         // TODO draw initial
 
         for (turn = 0; turn < deadline; turn++) {
+            if (stop) {
+                return;
+            }
 
             ticker.tick();
             player.move(this);
@@ -161,5 +166,9 @@ public class Simulation implements OrderCompletedListener {
 
     public void setTicker(Ticker ticker) {
         this.ticker = ticker;
+    }
+
+    public void stop() {
+        this.stop = true;
     }
 }

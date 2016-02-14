@@ -85,9 +85,7 @@ public class Simulation implements OrderCompletedListener {
             ticker.tick();
             if (turn < deadline - 1) {
                 turn++;
-                if (hasUnscheduledOrders()) {
-                    player.move(this);
-                }
+                player.move(this);
             } else {
                 break;
             }
@@ -102,15 +100,6 @@ public class Simulation implements OrderCompletedListener {
                 turnListener.onSimulationTurn(this);
             }
         }
-    }
-
-    private boolean hasUnscheduledOrders() {
-        for (Order order : orders) {
-            if (!order.isScheduled()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private boolean hasPendingOrders() {

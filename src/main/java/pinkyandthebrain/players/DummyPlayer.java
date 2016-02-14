@@ -22,6 +22,10 @@ public class DummyPlayer implements Player, RetrieveListener {
 
     @Override
     public void move(Simulation simulation) {
+        if (!hasUnscheduledOrders()) {
+            return;
+        }
+
         for (Drone drone : simulation.getDrones()) {
             if (drone.isBusy()) {
                 continue;
@@ -87,5 +91,14 @@ public class DummyPlayer implements Player, RetrieveListener {
     @Override
     public void onProductRetrieved(Warehouse warehouse, Product product, int quantity) {
         reserved[warehouse.getId()][product.getId()] -= quantity;
+    }
+
+    private boolean hasUnscheduledOrders() {
+        for (Order order : simulation.getOrders()) {
+            if (!order.isScheduled()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

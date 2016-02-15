@@ -32,6 +32,7 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
     private final Slider zoom = new Slider();
     private final Spinner<Integer> fps = new Spinner<>();
     private final Spinner<Integer> tps = new Spinner<>();
+    private final CheckBox proportional = new CheckBox();
     private final Slider currentTurn = new Slider();
     private final SimulationCanvas canvas = new SimulationCanvas();
     private final Button start = new Button("Start");
@@ -67,11 +68,13 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
         sidebar.setPrefWidth(200);
         sidebar.setPadding(new Insets(10, 10, 10, 10));
         sidebar.getChildren().addAll(
-                  new Label("Input"), input
+                new Label("Input"), input
                 , spacer()
                 , new Label("Player"), player
                 , spacer()
                 , new Label("Zoom"), zoom
+                , spacer()
+                , new Label("Proportional orders"), proportional
                 , spacer()
                 , new Label("Frames/second"), fps
                 , spacer()
@@ -101,6 +104,8 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
         zoom.setValue(1);
         zoom.setMin(1);
         zoom.setMax(5);
+
+        proportional.selectedProperty().set(true);
 
         fps.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(24, 96, 24, 24));
 
@@ -261,7 +266,8 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
 
             for (Order order : simulation.getOrders()) {
                 ctx.setFill(order.isCompleted() ? theme.orderCompleted : theme.orderPending);
-                double radius = order.getItems().size() * 0.25;
+
+                double radius = proportional.isSelected() ? order.getItems().size() * 0.25 : 2;
                 ctx.fillOval(order.getDestination().col() - (radius / 2), order.getDestination().row() - (radius / 2), radius, radius);
             }
 

@@ -87,7 +87,7 @@ public class Drone {
     }
 
     protected void load(Product product, int quantity) {
-        Preconditions.checkArgument(totalWeight() + (product.getWeight() * quantity) <= capacity);
+        Preconditions.checkArgument(totalWeight() + (product.getWeight() * quantity) <= capacity, "Exceeded drone capacity");
         for (int i = 0; i < quantity; i++) {
             inventory.add(product);
         }

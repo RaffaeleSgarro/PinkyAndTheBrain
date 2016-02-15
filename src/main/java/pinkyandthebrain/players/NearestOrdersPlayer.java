@@ -135,7 +135,7 @@ public class NearestOrdersPlayer implements Player, RetrieveListener {
             }
 
             deliverCommands.setStart(warehouse.getLocation());
-            deliverCommands.setStart(warehouse.getLocation());
+            deliverCommands.setEnd(warehouse.getLocation());
 
             for (Deliver cmd : deliverCommands.shortest()) {
                 drone.submit(cmd);

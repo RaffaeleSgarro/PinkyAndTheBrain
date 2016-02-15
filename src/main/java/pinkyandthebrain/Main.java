@@ -5,16 +5,18 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pinkyandthebrain.players.DummyPlayer;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.Properties;
 
 public class Main {
 
     public static final Logger log = LoggerFactory.getLogger("app");
 
+    @SuppressWarnings("unchecked")
     public static void main(String... args) throws Exception {
 
         Preconditions.checkArgument(args.length >= 1, "Usage: Main busy_day.in redundancy.in");
@@ -30,9 +32,18 @@ public class Main {
 
         int score = 0;
 
-        for (String arg : args) {
+        Properties conf = new Properties();
+        File confFile = new File("simulation.properties");
+        if (confFile.exists()) {
+            conf.load(new FileReader(confFile));
+        }
 
-            Simulation simulation = new Loader(new DummyPlayer()).loadFromResource(arg);
+        for (String arg : args) {
+            String playerClassName = (String) conf.getOrDefault("player", "pinkyandthebrain.players.DummyPlayer");
+            Class<Player> playerClass = (Class<Player>) Class.forName(playerClassName);
+            Player player = playerClass.newInstance();
+            log.info("Loading configuration for player " + playerClassName);
+            Simulation simulation = new Loader(player).loadFromResource(arg);
 
             log.info("Loaded simulation parameters from classpath resource {}", arg);
 

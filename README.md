@@ -26,3 +26,8 @@ on the command line. The following system properties are checked:
 suitable to be sent to the judge system
 - d, `-Dd=build/judge`, defaults to `judge`, set the directory where commands files
 are stored
+
+## Players
+
+The player strategy can be indicated in a file `simulation.properties` in the property
+`player` (see attached demo `simulation.properties.example`)

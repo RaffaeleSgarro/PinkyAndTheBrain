@@ -1,0 +1,4 @@
+# Choose one of (default)
+player=pinkyandthebrain.players.DummyPlayer
+# player=pinkyandthebrain.players.NearestOrdersPlayer
+# player=pinkyandthebrain.players.PasoDoblePlayer

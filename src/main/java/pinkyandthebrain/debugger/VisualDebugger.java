@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import pinkyandthebrain.*;
 import pinkyandthebrain.players.DummyPlayer;
 import pinkyandthebrain.players.NearestOrdersPlayer;
+import pinkyandthebrain.players.PasoDoblePlayer;
 
 public class VisualDebugger extends Application implements Ticker, TurnListener {
 
@@ -94,8 +95,8 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
         input.getItems().addAll("busy_day.in", "mother_of_all_warehouses.in", "redundancy.in");
         input.setValue("busy_day.in");
 
-        player.getItems().addAll("Dummy", "Nearest orders");
-        player.setValue("Dummy");
+        player.getItems().addAll("Dummy", "Nearest orders", "Paso doble");
+        player.setValue("Paso doble");
 
         zoom.setValue(1);
         zoom.setMin(1);
@@ -129,6 +130,8 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
                 return new DummyPlayer();
             case "Nearest orders":
                 return new NearestOrdersPlayer();
+            case "Paso doble":
+                return new PasoDoblePlayer();
             default:
                 throw new RuntimeException("Player value not mapped to player implementation: " + player.getValue());
         }

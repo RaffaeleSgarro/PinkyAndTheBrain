@@ -16,6 +16,9 @@ the existing project.
 The following commands generate the required files in `build/judge`
 
     .\gradlew sourceCode simulations
+    
+The gradle `simulations` task passes the project property `repeat` to the simulation,
+so you can repeat simulations with `-Prepeat=500`
 
 ## Usage
 
@@ -26,6 +29,7 @@ on the command line. The following system properties are checked:
 suitable to be sent to the judge system
 - d, `-Dd=build/judge`, defaults to `judge`, set the directory where commands files
 are stored
+- repeat, `-Drepeat=1000`, defaults to `1`
 
 ## Players
 

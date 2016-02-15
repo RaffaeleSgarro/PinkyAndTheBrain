@@ -38,29 +38,49 @@ public class Main {
             conf.load(new FileReader(confFile));
         }
 
+        int repeat = Integer.parseInt(StringUtils.defaultIfBlank(System.getProperty("repeat"), "1"));
+
         for (String arg : args) {
-            String playerClassName = (String) conf.getOrDefault("player", "pinkyandthebrain.players.DummyPlayer");
-            Class<Player> playerClass = (Class<Player>) Class.forName(playerClassName);
-            Player player = playerClass.newInstance();
-            log.info("Loading configuration for player " + playerClassName);
-            Simulation simulation = new Loader(player).loadFromResource(arg);
+            Simulation bestSimulation = null;
 
-            log.info("Loaded simulation parameters from classpath resource {}", arg);
+            boolean isRepeat = repeat > 1;
 
-            simulation.start();
+            if (isRepeat) {
+                log.info("Simulations will be repeated {} times", repeat);
+            }
 
-            log.info("Simulation {} scored: {}", arg, simulation.getScore());
+            for (int i = 0; i < repeat; i++) {
+                if (isRepeat) {
+                    log.info("Following attempt {}/{}", i + 1, repeat);
+                }
+                String playerClassName = (String) conf.getOrDefault("player", "pinkyandthebrain.players.DummyPlayer");
+                Class<Player> playerClass = (Class<Player>) Class.forName(playerClassName);
+                Player player = playerClass.newInstance();
+                log.info("Loading configuration for player " + playerClassName);
+                Simulation simulation = new Loader(player).loadFromResource(arg);
+                simulation.setRepeated(isRepeat);
+
+                log.info("Loaded simulation parameters from classpath resource {}", arg);
+
+                simulation.start();
+
+                log.info("Simulation {} scored: {}", arg, simulation.getScore());
+
+                if (bestSimulation == null || simulation.getScore() > bestSimulation.getScore()) {
+                    bestSimulation = simulation;
+                }
+            }
 
             if (isSaveToFile) {
                 File commandsFile = new File(baseDir, arg + ".txt");
                 PrintWriter out = new PrintWriter(new FileOutputStream(commandsFile));
-                simulation.printCommands(out);
+                bestSimulation.printCommands(out);
                 out.flush();
                 out.close();
                 log.info("Written commands to {}", commandsFile);
             }
 
-            score += simulation.getScore();
+            score += bestSimulation.getScore();
         }
 
         log.info("Total score: {}", score);

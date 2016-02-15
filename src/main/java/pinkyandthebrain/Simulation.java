@@ -26,6 +26,7 @@ public class Simulation implements OrderCompletedListener {
     private int turn;
 
     private volatile boolean stop;
+    private boolean repeated;
 
     public Simulation(int rows, int columns, int numberOfDrones, int deadline, int droneCapacity, Player player) {
         this.rows = rows;
@@ -178,5 +179,13 @@ public class Simulation implements OrderCompletedListener {
 
     public int getColumns() {
         return columns;
+    }
+
+    public boolean isRepeated() {
+        return repeated;
+    }
+
+    public void setRepeated(boolean repeated) {
+        this.repeated = repeated;
     }
 }

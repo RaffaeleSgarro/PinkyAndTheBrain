@@ -36,6 +36,6 @@ task sourceCode(type: Zip) {
 task simulations(type: JavaExec, dependsOn: classes) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'pinkyandthebrain.Main'
-    systemProperties 'save': 'true', 'd' : 'build/judge'
+    systemProperties 'save': 'true', 'd' : 'build/judge', 'repeat': project.hasProperty('repeat') ? project.repeat : '1'
     args 'busy_day.in', 'mother_of_all_warehouses.in', 'redundancy.in'
 }

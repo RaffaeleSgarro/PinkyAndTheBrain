@@ -44,7 +44,12 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
             return;
         }
 
-        for (Drone drone : simulation.getDrones()) {
+        List<Drone> drones = simulation.getDrones();
+        if (simulation.isRepeated()) {
+            Collections.shuffle(drones);
+        }
+
+        for (Drone drone : drones) {
             if (drone.isBusy()) {
                 continue;
             }

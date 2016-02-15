@@ -8,7 +8,7 @@ import java.util.*;
 public class PasoDoblePlayer implements Player, RetrieveListener {
 
     private int[][] reserved;
-    private Queue<Item> unscheduled;
+    private LinkedList<Item> unscheduled;
     private Simulation simulation;
 
     @Override
@@ -53,18 +53,22 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
                 return;
             }
 
-            // Do not remove yet, in case we don't have enough turns to deliver
-            Item item = unscheduled.peek();
-
-            List<Warehouse> availableWarehouses = findWarehouseWith(item.getProduct(), 1);
+            Item item = null;
             Warehouse warehouse = null;
             double bestDistance = Double.MAX_VALUE;
-            for (Warehouse available : availableWarehouses) {
-                double distance = drone.getPosition().distanceTo(available.getLocation())
-                        + available.getLocation().distanceTo(item.getOrder().getDestination());
-                if (distance < bestDistance) {
-                    bestDistance = distance;
-                    warehouse = available;
+
+            for (int i = 0; i < Math.min(10, unscheduled.size()); i++) {
+                Item currentItem = unscheduled.get(i);
+
+                List<Warehouse> availableWarehouses = findWarehouseWith(currentItem.getProduct(), 1);
+                for (Warehouse available : availableWarehouses) {
+                    double distance = drone.getPosition().distanceTo(available.getLocation())
+                            + available.getLocation().distanceTo(currentItem.getOrder().getDestination());
+                    if (distance < bestDistance) {
+                        bestDistance = distance;
+                        warehouse = available;
+                        item = currentItem;
+                    }
                 }
             }
 
@@ -81,11 +85,13 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
                 }
             }
 
+            final Item stupidJavaItem = item;
+
             Collections.sort(item2OrderedByCost, new Comparator<Item>() {
                 @Override
                 public int compare(Item o1, Item o2) {
-                    int d1 = (int) o1.getOrder().getDestination().distanceTo(item.getOrder().getDestination());
-                    int d2 = (int) o2.getOrder().getDestination().distanceTo(item.getOrder().getDestination());
+                    int d1 = (int) o1.getOrder().getDestination().distanceTo(stupidJavaItem.getOrder().getDestination());
+                    int d2 = (int) o2.getOrder().getDestination().distanceTo(stupidJavaItem.getOrder().getDestination());
                     return d1 - d2;
                 }
             });

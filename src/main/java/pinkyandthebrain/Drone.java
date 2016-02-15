@@ -34,7 +34,7 @@ public class Drone {
     }
 
     public boolean isBusy() {
-        return turnsToWaitBeforeFetchingNextCommand > 0;
+        return turnsToWaitBeforeFetchingNextCommand > 0 || pendingCommands.size() > 0;
     }
 
     public int getId() {

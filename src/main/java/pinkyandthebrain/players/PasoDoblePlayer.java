@@ -57,7 +57,7 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
             Warehouse warehouse = null;
             double bestDistance = Double.MAX_VALUE;
             int availableCapacity = drone.getAvailableCapacity();
-            List<Deliver> deliverCommands = new ArrayList<>();
+            ShortestPathFinder shortestPathFinder = new ShortestPathFinder();
 
             // 50 is a magic constant
             for (int i = 0; i < Math.min(50, unscheduled.size()); i++) {
@@ -89,7 +89,8 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
             unscheduled.remove(item);
             reserve(warehouse, item.getProduct(), 1);
             drone.submit(new Load(warehouse, item.getProduct(), 1));
-            deliverCommands.add(new Deliver(item.getOrder(), item.getProduct(), 1));
+            shortestPathFinder.setStart(warehouse.getLocation());
+            shortestPathFinder.add(new Deliver(item.getOrder(), item.getProduct(), 1));
 
             List<Item> item2OrderedByCost = new ArrayList<>();
             // 0.1 is magic constant
@@ -118,8 +119,6 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
             });
 
 
-
-
             for (Item item2 : item2OrderedByCost) {
                 if (findAvailableProduct(item2.getProduct(), warehouse) > 0) {
                     if (item2.getProduct().getWeight() <= availableCapacity) {
@@ -127,12 +126,12 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
                         unscheduled.remove(item2);
                         reserve(warehouse, item2.getProduct(), 1);
                         drone.submit(new Load(warehouse, item2.getProduct(), 1));
-                        deliverCommands.add(new Deliver(item2.getOrder(), item2.getProduct(), 1));
+                        shortestPathFinder.add(new Deliver(item2.getOrder(), item2.getProduct(), 1));
                     }
                 }
             }
 
-            for (Deliver cmd : deliverCommands) {
+            for (Deliver cmd : shortestPathFinder.shortest()) {
                 drone.submit(cmd);
             }
         }

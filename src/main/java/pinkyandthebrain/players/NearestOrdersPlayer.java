@@ -59,7 +59,7 @@ public class NearestOrdersPlayer implements Player, RetrieveListener {
             Warehouse warehouse = null;
             double bestDistance = Double.MAX_VALUE;
             int availableCapacity = drone.getAvailableCapacity();
-            List<Deliver> deliverCommands = new ArrayList<>();
+            ShortestPathFinder deliverCommands = new ShortestPathFinder();
 
             for (Item i : unscheduled) {
                 List<Warehouse> availableWarehouses = findWarehouseWith(i.getProduct(), 1);
@@ -134,12 +134,10 @@ public class NearestOrdersPlayer implements Player, RetrieveListener {
                 }
             }
 
+            deliverCommands.setStart(warehouse.getLocation());
+            deliverCommands.setStart(warehouse.getLocation());
 
-
-
-
-
-            for (Deliver cmd : deliverCommands) {
+            for (Deliver cmd : deliverCommands.shortest()) {
                 drone.submit(cmd);
             }
         }

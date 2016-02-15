@@ -1,5 +1,7 @@
 package pinkyandthebrain;
 
+import com.google.common.base.Preconditions;
+
 public class Load implements Command {
 
     private final Warehouse warehouse;
@@ -21,6 +23,8 @@ public class Load implements Command {
             route = new Route(drone.getPosition(), warehouse.getLocation());
             drone.setRoute(route);
         }
+
+        Preconditions.checkArgument(drone.getPosition().equals(route.getCurrentPosition()), "Drone out of route!");
 
         // TODO use route.turns() ?
         if (executed == planned() - 1) {

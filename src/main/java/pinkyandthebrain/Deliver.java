@@ -1,5 +1,7 @@
 package pinkyandthebrain;
 
+import com.google.common.base.Preconditions;
+
 public class Deliver implements Command {
 
     private final Order order;
@@ -22,6 +24,8 @@ public class Deliver implements Command {
             drone.setRoute(route);
         }
 
+        Preconditions.checkArgument(drone.getPosition().equals(route.getCurrentPosition()), "Drone out of route!");
+
         // TODO use route.turns() ?
         if (executed == planned() - 1) {
             drone.deliver(product, order);
@@ -42,5 +46,9 @@ public class Deliver implements Command {
     @Override
     public String toString() {
         return "D" + " " + order.getOrderId() + " " + product.getId() + " " + quantity;
+    }
+
+    public Order getOrder() {
+        return order;
     }
 }

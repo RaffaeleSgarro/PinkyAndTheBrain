@@ -57,7 +57,8 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
             Warehouse warehouse = null;
             double bestDistance = Double.MAX_VALUE;
 
-            for (int i = 0; i < Math.min(10, unscheduled.size()); i++) {
+            // 50 is a magic constant
+            for (int i = 0; i < Math.min(50, unscheduled.size()); i++) {
                 Item currentItem = unscheduled.get(i);
 
                 List<Warehouse> availableWarehouses = findWarehouseWith(currentItem.getProduct(), 1);

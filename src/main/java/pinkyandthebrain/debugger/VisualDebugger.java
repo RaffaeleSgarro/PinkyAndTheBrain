@@ -75,7 +75,7 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
                 , spacer()
                 , new Label("Frames/second"), fps
                 , spacer()
-                , new Label("Turns/secnod"), tps
+                , new Label("Turns/second"), tps
         );
         input.setPrefWidth(Double.MAX_VALUE);
         zoom.setPrefWidth(Double.MAX_VALUE);

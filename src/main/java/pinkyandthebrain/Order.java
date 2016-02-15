@@ -54,7 +54,7 @@ public class Order {
                 break;
             }
         }
-        Preconditions.checkNotNull(undelivered);
+        Preconditions.checkNotNull(undelivered, "In this order there is no product " + product + " to be delivered");
         undelivered.setDelivered(true);
 
         if (isCompleted()) {

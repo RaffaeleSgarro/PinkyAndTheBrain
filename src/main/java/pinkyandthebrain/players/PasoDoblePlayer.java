@@ -56,6 +56,8 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
             Item item = null;
             Warehouse warehouse = null;
             double bestDistance = Double.MAX_VALUE;
+            int availableCapacity = drone.getAvailableCapacity();
+            List<Deliver> maybeDeliverCommands = new ArrayList<>();
 
             // 50 is a magic constant
             for (int i = 0; i < Math.min(50, unscheduled.size()); i++) {
@@ -73,12 +75,15 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
                 }
             }
 
+            availableCapacity -= item.getProduct().getWeight();
             unscheduled.remove(item);
             reserve(warehouse, item.getProduct(), 1);
             drone.submit(new Load(warehouse, item.getProduct(), 1));
 
+
             List<Item> item2OrderedByCost = new ArrayList<>();
-            double cutoff = .5 * .5* (simulation.getColumns() + simulation.getRows());
+            // 0.1 is magic constant
+            double cutoff = .1 * .5* (simulation.getColumns() + simulation.getRows());
 
             for (Item maybeAdd : unscheduled) {
                 if (maybeAdd.getOrder().getDestination().distanceTo(item.getOrder().getDestination()) < cutoff) {
@@ -102,10 +107,8 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
                 }
             });
 
-            List<Deliver> maybeDeliverCommands = new ArrayList<>();
 
-            int availableCapacity = drone.getAvailableCapacity();
-            availableCapacity -= item.getProduct().getWeight();
+
 
             for (Item item2 : item2OrderedByCost) {
                 if (findAvailableProduct(item2.getProduct(), warehouse) > 0) {

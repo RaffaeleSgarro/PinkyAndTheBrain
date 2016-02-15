@@ -91,8 +91,13 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
             Collections.sort(item2OrderedByCost, new Comparator<Item>() {
                 @Override
                 public int compare(Item o1, Item o2) {
+                    if (o1.getOrder().getItems().size() != o2.getOrder().getItems().size()) {
+                        return o1.getOrder().getItems().size() - o2.getOrder().getItems().size();
+                    }
+
                     int d1 = (int) o1.getOrder().getDestination().distanceTo(stupidJavaItem.getOrder().getDestination());
                     int d2 = (int) o2.getOrder().getDestination().distanceTo(stupidJavaItem.getOrder().getDestination());
+
                     return d1 - d2;
                 }
             });

@@ -63,6 +63,13 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
             for (int i = 0; i < Math.min(50, unscheduled.size()); i++) {
                 Item currentItem = unscheduled.get(i);
 
+                int unscheduledSize = 0;
+                for (Item otherUnscheduledItemInSameOrderAsThisItem : currentItem.getOrder().getItems()) {
+                    if (unscheduled.contains(otherUnscheduledItemInSameOrderAsThisItem)) {
+                        unscheduledSize++;
+                    }
+                }
+
                 List<Warehouse> availableWarehouses = findWarehouseWith(currentItem.getProduct(), 1);
                 for (Warehouse available : availableWarehouses) {
                     double distance = drone.getPosition().distanceTo(available.getLocation())
@@ -73,6 +80,9 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
                         item = currentItem;
                     }
                 }
+
+                if (unscheduledSize == 1)
+                    break;
             }
 
             availableCapacity -= item.getProduct().getWeight();

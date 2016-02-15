@@ -68,11 +68,7 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
                 }
             }
 
-            if (simulation.getTurn() + 1 + Math.ceil(bestDistance) + 1 >= simulation.getDeadline()) {
-                continue;
-            }
-
-            unscheduled.remove();
+            unscheduled.remove(item);
             reserve(warehouse, item.getProduct(), 1);
             drone.submit(new Load(warehouse, item.getProduct(), 1));
 

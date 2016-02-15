@@ -112,4 +112,8 @@ public class Drone {
     public boolean isShutDown() {
         return shutdown;
     }
+
+    public int getAvailableCapacity() {
+        return capacity - totalWeight();
+    }
 }

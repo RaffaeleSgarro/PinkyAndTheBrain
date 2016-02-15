@@ -171,4 +171,12 @@ public class Simulation implements OrderCompletedListener {
     public void stop() {
         this.stop = true;
     }
+
+    public int getRows() {
+        return rows;
+    }
+
+    public int getColumns() {
+        return columns;
+    }
 }

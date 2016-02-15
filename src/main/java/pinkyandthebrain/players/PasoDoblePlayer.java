@@ -77,7 +77,14 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
             drone.submit(new Load(warehouse, item.getProduct(), 1));
 
             List<Item> item2OrderedByCost = new ArrayList<>();
-            item2OrderedByCost.addAll(unscheduled);
+            double cutoff = .5 * .5* (simulation.getColumns() + simulation.getRows());
+
+            for (Item maybeAdd : unscheduled) {
+                if (maybeAdd.getOrder().getDestination().distanceTo(item.getOrder().getDestination()) < cutoff) {
+                    item2OrderedByCost.add(maybeAdd);
+                }
+            }
+
             Collections.sort(item2OrderedByCost, new Comparator<Item>() {
                 @Override
                 public int compare(Item o1, Item o2) {

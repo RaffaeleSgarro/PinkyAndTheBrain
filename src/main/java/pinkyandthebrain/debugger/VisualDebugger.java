@@ -261,7 +261,8 @@ public class VisualDebugger extends Application implements Ticker, TurnListener 
 
             for (Order order : simulation.getOrders()) {
                 ctx.setFill(order.isCompleted() ? theme.orderCompleted : theme.orderPending);
-                ctx.fillOval(order.getDestination().col() - 1, order.getDestination().row() - 1, 2, 2);
+                double radius = order.getItems().size() * 0.25;
+                ctx.fillOval(order.getDestination().col() - (radius / 2), order.getDestination().row() - (radius / 2), radius, radius);
             }
 
             for (Drone drone : simulation.getDrones()) {

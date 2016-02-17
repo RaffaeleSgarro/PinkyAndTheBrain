@@ -48,12 +48,20 @@ public class ScoreTestAgainstJudge {
             String command = fileScanner.next();
             switch (command) {
                 case "L":
-                    int warehouseId = fileScanner.nextInt();
+                    int loadWarehouseId = fileScanner.nextInt();
                     int loadProductId = fileScanner.nextInt();
                     int loadQuantity = fileScanner.nextInt();
-                    player.submit(droneId, new Load(simulation.getWarehouses().get(warehouseId)
+                    player.submit(droneId, new Load(simulation.getWarehouses().get(loadWarehouseId)
                                                   , simulation.getProducts().get(loadProductId)
                                                   , loadQuantity));
+                    break;
+                case "U":
+                    int unloadWarehouseId = fileScanner.nextInt();
+                    int unloadProductId = fileScanner.nextInt();
+                    int unloadQuantity = fileScanner.nextInt();
+                    player.submit(droneId, new Unload(simulation.getWarehouses().get(unloadWarehouseId)
+                            , simulation.getProducts().get(unloadProductId)
+                            , unloadQuantity));
                     break;
                 case "D":
                     int orderId = fileScanner.nextInt();

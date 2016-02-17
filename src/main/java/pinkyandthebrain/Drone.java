@@ -116,4 +116,12 @@ public class Drone {
     public int getAvailableCapacity() {
         return capacity - totalWeight();
     }
+
+    public void unload(Product product, int quantity) {
+        Preconditions.checkArgument(quantity > 0);
+        for (int i = 0; i < quantity; i++) {
+            Preconditions.checkArgument(inventory.contains(product), "Inventory does not contain " + product);
+            inventory.remove(product);
+        }
+    }
 }

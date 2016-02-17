@@ -46,4 +46,9 @@ public class Warehouse {
     public void addRetrieveListener(RetrieveListener retrieveListener) {
         this.retrieveListeners.add(retrieveListener);
     }
+
+    public void store(Product product, int quantity) {
+        Preconditions.checkArgument(quantity > 0, "Quantity must be positive");
+        available[product.getId()] += quantity;
+    }
 }

@@ -188,4 +188,9 @@ public class Simulation implements OrderCompletedListener {
     public void setRepeated(boolean repeated) {
         this.repeated = repeated;
     }
+
+    public boolean isBusyDay() {
+        // TODO
+        return false;
+    }
 }

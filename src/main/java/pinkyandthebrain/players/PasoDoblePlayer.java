@@ -10,12 +10,14 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
     private int[][] reserved;
     private LinkedList<Item> unscheduled;
     private Simulation simulation;
+    private Random random;
 
     @Override
     public void initialize(Simulation simulation) {
         this.simulation = simulation;
         reserved = new int[simulation.getWarehouses().size()][simulation.getProducts().size()];
         unscheduled = new LinkedList<>();
+        random = new Random();
 
         List<Order> orders = new ArrayList<>();
         orders.addAll(simulation.getOrders());
@@ -52,6 +54,47 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
         for (Drone drone : drones) {
             if (drone.isBusy()) {
                 continue;
+            }
+
+            if (moveItemsBetweenWarehouses() && simulation.isBusyDay()) {
+                int loadCutoff = 20;
+                int unloadCutoff = 2;
+                int availableCapacity = drone.getAvailableCapacity();
+                Warehouse from = null;
+                double bestDistance = Double.MAX_VALUE;
+
+                for (Warehouse warehouse : simulation.getWarehouses()) {
+                    double distance = warehouse.getLocation().distanceTo(drone.getPosition());
+                    if (distance < bestDistance) {
+                        bestDistance = distance;
+                        from = warehouse;
+                    }
+                }
+
+                Warehouse to = null;
+
+                while (to == null || to.equals(from)) {
+                    to = simulation.getWarehouses().get(random.nextInt(simulation.getWarehouses().size()));
+                }
+
+                List<Unload> unloads = new ArrayList<>();
+                for (Product product : simulation.getProducts()) {
+                    if (findAvailableProduct(product, from) > loadCutoff
+                            && findAvailableProduct(product, to) <= unloadCutoff
+                            && availableCapacity >= product.getWeight()) {
+                        availableCapacity -= product.getWeight();
+                        reserve(from, product, 1);
+                        drone.submit(new Load(from, product, 1));
+                        unloads.add(new Unload(to, product, 1));
+                    }
+                }
+
+                for (Unload unloadCmd : unloads) {
+                    drone.submit(unloadCmd);
+                }
+
+                if (availableCapacity < 30)
+                    continue;
             }
 
             if (unscheduled.isEmpty()) {
@@ -139,6 +182,18 @@ public class PasoDoblePlayer implements Player, RetrieveListener {
             for (Deliver cmd : shortestPathFinder.shortest()) {
                 drone.submit(cmd);
             }
+        }
+    }
+
+    private boolean moveItemsBetweenWarehouses() {
+        if (simulation.getTurn() < 2000) {
+            return false;
+        } else if (simulation.getTurn() < 1000) {
+            return random.nextDouble() < .2;
+        } else if (simulation.getTurn() < 5000) {
+            return random.nextDouble() < .2;
+        } else {
+            return false;
         }
     }
 

@@ -1,8 +1,8 @@
 package pinkyandthebrain;
 
-import org.testng.Assert;
+import hashcode2016.*;
 import org.testng.annotations.Test;
-import pinkyandthebrain.players.StaticPlayer;
+import hashcode2016.players.StaticPlayer;
 
 public class SimulationScoreTest {
 

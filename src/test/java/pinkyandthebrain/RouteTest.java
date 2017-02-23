@@ -1,6 +1,7 @@
 package pinkyandthebrain;
 
-import framework.Point2D;
+import hashcode2016.framework.Point2D;
+import hashcode2016.Route;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;

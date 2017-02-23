@@ -1,6 +1,7 @@
 package pinkyandthebrain;
 
-import framework.Point2D;
+import hashcode2016.framework.Point2D;
+import hashcode2016.Order;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

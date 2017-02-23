@@ -1,9 +1,10 @@
 package pinkyandthebrain;
 
 import com.google.common.base.Preconditions;
+import hashcode2016.*;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import pinkyandthebrain.players.StaticPlayer;
+import hashcode2016.players.StaticPlayer;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;

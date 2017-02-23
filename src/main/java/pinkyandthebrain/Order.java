@@ -1,6 +1,7 @@
 package pinkyandthebrain;
 
 import com.google.common.base.Preconditions;
+import framework.Point2D;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

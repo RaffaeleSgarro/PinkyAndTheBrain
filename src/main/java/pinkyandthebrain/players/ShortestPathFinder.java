@@ -2,7 +2,7 @@ package pinkyandthebrain.players;
 
 import com.google.common.base.Preconditions;
 import pinkyandthebrain.Deliver;
-import pinkyandthebrain.Point2D;
+import framework.Point2D;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

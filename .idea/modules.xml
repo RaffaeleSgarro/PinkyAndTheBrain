@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/PinkyAndTheBrain.iml" filepath="$PROJECT_DIR$/PinkyAndTheBrain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PinkyAndTheBrain.iml" filepath="$PROJECT_DIR$/.idea/modules/PinkyAndTheBrain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PinkyAndTheBrain_main.iml" filepath="$PROJECT_DIR$/.idea/modules/PinkyAndTheBrain_main.iml" group="PinkyAndTheBrain" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PinkyAndTheBrain_test.iml" filepath="$PROJECT_DIR$/.idea/modules/PinkyAndTheBrain_test.iml" group="PinkyAndTheBrain" />
     </modules>
   </component>
 </project>

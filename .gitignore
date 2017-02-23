@@ -1,6 +1,7 @@
 tmp/
 out/
 build/
+classes/
 .gradle/
 
 .idea/workspace.xml

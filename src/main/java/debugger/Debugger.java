@@ -242,6 +242,14 @@ public class Debugger extends Application implements Ticker, TurnListener {
                 dragStartY = event.getY();
                 render();
             });
+
+            setOnScroll(event -> {
+                // mouse wheel
+                if (event.getTotalDeltaY() == 0 && event.getMultiplierY() != 0) {
+                    double deltaZoom = event.getDeltaY() / event.getMultiplierY() * 0.3;
+                    zoom.valueProperty().set(zoom.getValue() + deltaZoom);
+                }
+            });
         }
 
         public void render() {

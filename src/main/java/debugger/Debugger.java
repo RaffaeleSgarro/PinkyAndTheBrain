@@ -90,6 +90,7 @@ public class Debugger extends Application implements Ticker, TurnListener {
                 , new Label("Turns/second"), tps
         );
         input.setPrefWidth(Double.MAX_VALUE);
+        player.setPrefWidth(Double.MAX_VALUE);
         zoom.setPrefWidth(Double.MAX_VALUE);
         fps.setPrefWidth(Double.MAX_VALUE);
         tps.setPrefWidth(Double.MAX_VALUE);
